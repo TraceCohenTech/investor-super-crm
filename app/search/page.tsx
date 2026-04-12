@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { ContactRecord, SearchData } from "@/lib/types";
 import {
@@ -160,7 +161,22 @@ function persistSaved(searches: SavedSearch[]) {
   localStorage.setItem(SAVED_KEY, JSON.stringify(searches));
 }
 
-export default function SearchPage() {
+export default function SearchPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="text-2xl mb-3">🔍</div>
+          <div className="text-sm text-[#a1a1aa]">Loading search...</div>
+        </div>
+      </div>
+    }>
+      <SearchPage />
+    </Suspense>
+  );
+}
+
+function SearchPage() {
   const [data, setData] = useState<SearchData | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -174,6 +190,8 @@ export default function SearchPage() {
   const [saveName, setSaveName] = useState("");
   const pageSize = 50;
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     import("@/data/search-index.json").then((mod) => {
       setData(mod.default as unknown as SearchData);
@@ -184,6 +202,31 @@ export default function SearchPage() {
   useEffect(() => {
     setSavedSearches(loadSaved());
   }, []);
+
+  // Parse URL query params into filters on mount
+  useEffect(() => {
+    if (!searchParams) return;
+    const FILTER_KEYS: (keyof Filters)[] = [
+      "investorType", "region", "fundStage", "sector", "status",
+      "crmStatus", "relationshipStrength", "sources", "qualityGrade",
+      "staleness", "tags",
+    ];
+    const newFilters = { ...EMPTY_FILTERS };
+    let hasUrlFilters = false;
+    for (const key of FILTER_KEYS) {
+      const val = searchParams.get(key);
+      if (val) {
+        newFilters[key] = val.split(",");
+        hasUrlFilters = true;
+      }
+    }
+    const q = searchParams.get("q");
+    if (q) { setQuery(q); hasUrlFilters = true; }
+    if (hasUrlFilters) {
+      setFilters(newFilters);
+      setPage(0);
+    }
+  }, [searchParams]);
 
   const toggleFilter = useCallback((key: string, value: string) => {
     setActivePreset(null);

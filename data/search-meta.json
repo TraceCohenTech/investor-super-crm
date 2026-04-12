@@ -148,14 +148,17 @@
       "israel": 43
     },
     "tags": {
+      "reachable": 20547,
       "not-emailed": 17420,
       "senior": 10955,
       "verified-linkedin": 10345,
       "has-linkedin": 10202,
       "vc": 9360,
+      "multi-source": 9070,
       "in-hubspot": 7574,
       "contacted": 4658,
       "founder": 4273,
+      "email-only": 3568,
       "nyc": 2769,
       "angel": 2588,
       "active": 1153,
@@ -166,6 +169,7 @@
       "lp": 579,
       "junior": 553,
       "accelerator": 553,
+      "high-engagement": 497,
       "ai": 420,
       "pre-seed": 413,
       "angel-syndicate": 410,
@@ -174,6 +178,7 @@
       "media": 346,
       "pre-seed-regs": 308,
       "community-led": 304,
+      "board-member": 275,
       "growth": 231,
       "deep-tech": 230,
       "fo-community": 226,
@@ -182,12 +187,7 @@
       "early-stage": 202,
       "endowment": 200,
       "seed": 190,
-      "la": 179,
-      "deep-tech-group": 166,
-      "boston": 165,
-      "large-check": 161,
-      "applied-ai-group": 139,
-      "mid-check": 127
+      "la": 179
     }
   },
   "dataQuality": {

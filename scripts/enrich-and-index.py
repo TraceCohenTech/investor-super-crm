@@ -677,6 +677,69 @@ for rec in unified:
     if li and not li.startswith("http"):
         li = ""
 
+    # ─── Smart Auto-Tags ───
+    auto_tags = set(tags)
+    title_lower = (rec.get("title") or "").lower()
+    company_lower = (rec.get("company") or "").lower()
+
+    # Accelerator / notable org networks
+    yc_keywords = ["y combinator", "ycombinator", " yc ", "yc "]
+    if any(k in company_lower or k in title_lower for k in yc_keywords):
+        auto_tags.add("yc-network")
+    if any(k in company_lower for k in ["500 startups", "500 global", "500.co"]):
+        auto_tags.add("500-startups")
+    if any(k in company_lower for k in ["techstars"]):
+        auto_tags.add("techstars")
+
+    # Big tech alumni
+    big_tech = ["google", "meta", "facebook", "amazon", "apple", "microsoft",
+                "netflix", "stripe", "uber", "airbnb", "tesla", "spacex"]
+    if any(k in company_lower for k in big_tech):
+        auto_tags.add("big-tech")
+
+    # Board members
+    if any(k in title_lower for k in ["board member", "board director", "board of directors",
+                                        "advisory board", "board advisor"]):
+        auto_tags.add("board-member")
+
+    # Operator-investors
+    if ("ceo" in title_lower or "founder" in title_lower or "cto" in title_lower) and \
+       ("angel" in title_lower or "investor" in title_lower or "advisor" in title_lower):
+        auto_tags.add("operator-investor")
+
+    # Reachability
+    if rec.get("email") and li:
+        auto_tags.add("reachable")
+    elif rec.get("email"):
+        auto_tags.add("email-only")
+    elif li:
+        auto_tags.add("linkedin-only")
+
+    # Engagement-based tags
+    if email_count >= 10:
+        auto_tags.add("high-engagement")
+    if len(rec.get("wa_groups", [])) >= 2:
+        auto_tags.add("multi-wa")
+
+    # Recent activity
+    lc_str = rec.get("last_contact", "")
+    if lc_str and lc_str != "None":
+        try:
+            lc_dt = datetime.strptime(lc_str[:10], "%Y-%m-%d")
+            days_ago = (TODAY - lc_dt).days
+            if days_ago <= 7:
+                auto_tags.add("recently-active")
+            elif days_ago <= 30:
+                auto_tags.add("active-30d")
+        except (ValueError, IndexError):
+            pass
+
+    # Multi-source (appears in 3+ sources)
+    if len(src) >= 3:
+        auto_tags.add("multi-source")
+
+    tags = sorted(auto_tags)
+
     entry = {
         "id": rid,
         "n": name,
