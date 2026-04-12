@@ -1,0 +1,20 @@
+{
+  "total": 860,
+  "inCRM": 64,
+  "newToCRM": 796,
+  "hasEmail": 90,
+  "hasLinkedIn": 49,
+  "categories": {
+    "Fund of Funds": 50,
+    "Investment Advisory": 5,
+    "Sovereign Wealth": 1,
+    "VC Fund": 754,
+    "Family Office": 50
+  },
+  "sources": {
+    "FoF List": 56,
+    "Big VC List": 106,
+    "LP Family Office Intel": 50,
+    "Big VC List (Scraped)": 648
+  }
+}
