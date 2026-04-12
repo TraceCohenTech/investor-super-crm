@@ -1,20 +1,13 @@
 import StatCard from "@/components/StatCard";
-import { TopFirmsChart, StatusPieChart, CategoryBreakdownChart, MostActiveChart } from "@/components/Charts";
+import { TopFirmsChart, RegionChart, FundStageChart, StatusPieChart } from "@/components/Charts";
 import summary from "@/data/summary.json";
 
 export default function DashboardPage() {
   const statusData = [
     { name: "Active", value: summary.active },
     { name: "Warm", value: summary.warm },
-    { name: "New", value: summary.totalContacts - summary.active - summary.warm - summary.followUpDueToday },
-    { name: "Follow-Up Due", value: summary.followUpDueToday },
-  ];
-
-  const categoryData = [
-    { name: "Investors & Funds", value: summary.investorsAndFunds },
-    { name: "Angels & Individuals", value: summary.angelsAndIndividuals },
-    { name: "LinkedIn Only", value: summary.linkedInOnly },
-    { name: "NYC-Based", value: summary.nycBased },
+    { name: "Follow-Up Overdue", value: summary.followUpOverdue },
+    { name: "Other", value: summary.totalContacts - summary.active - summary.warm - summary.followUpOverdue },
   ];
 
   return (
@@ -28,18 +21,21 @@ export default function DashboardPage() {
         <StatCard label="Total Contacts" value={summary.totalContacts} icon="📊" />
         <StatCard label="Investors & Funds" value={summary.investorsAndFunds} icon="🏦" />
         <StatCard label="Angels" value={summary.angelsAndIndividuals} icon="👼" />
-        <StatCard label="NYC-Based" value={summary.nycBased} icon="🗽" />
         <StatCard label="LinkedIn Only" value={summary.linkedInOnly} icon="💼" />
+        <StatCard label="NYC Metro" value={summary.nycMetro} icon="🗽" />
+        <StatCard label="Bay Area" value={summary.bayArea} icon="🌉" />
+        <StatCard label="South Florida" value={summary.southFlorida} icon="🌴" />
+        <StatCard label="Boston" value={summary.boston} icon="🎓" />
         <StatCard label="Active (5+ emails)" value={summary.active} icon="✅" sub="Regular correspondents" />
         <StatCard label="Warm (3-4 emails)" value={summary.warm} icon="🌡️" sub="Growing relationships" />
-        <StatCard label="Follow-Up Due" value={summary.followUpDueToday} icon="📬" sub="Need attention today" />
+        <StatCard label="Follow-Up Overdue" value={summary.followUpOverdue} icon="🔥" sub="Need attention" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TopFirmsChart data={summary.topFirms} />
-        <MostActiveChart data={summary.mostActiveContacts} />
+        <RegionChart data={summary.regions} />
+        <FundStageChart data={summary.fundStages} />
         <StatusPieChart data={statusData} />
-        <CategoryBreakdownChart data={categoryData} />
       </div>
     </div>
   );

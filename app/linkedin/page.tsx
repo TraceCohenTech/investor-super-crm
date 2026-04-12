@@ -1,6 +1,6 @@
 "use client";
 
-import DataTable from "@/components/DataTable";
+import DataTable, { LinkedInLink } from "@/components/DataTable";
 import data from "@/data/linkedin.json";
 
 const columns = [
@@ -8,7 +8,9 @@ const columns = [
   { key: "Company", label: "Company" },
   { key: "Title", label: "Title" },
   { key: "Inferred Email", label: "Inferred Email" },
-  { key: "Source", label: "Source" },
+  { key: "Region", label: "Region" },
+  { key: "LinkedIn URL", label: "LinkedIn", render: (v: unknown) => v ? <LinkedInLink url={String(v)} /> : "—" },
+  { key: "Note", label: "Note" },
 ];
 
 export default function LinkedInPage() {
@@ -18,7 +20,7 @@ export default function LinkedInPage() {
         <h1 className="text-2xl font-bold tracking-tight text-white">💼 LinkedIn Network</h1>
         <p className="text-sm text-[#a1a1aa] mt-1">Contacts from LinkedIn — email needed</p>
       </div>
-      <DataTable data={data as Record<string, unknown>[]} columns={columns} searchKeys={["Name", "Company", "Title"]} />
+      <DataTable data={data as Record<string, unknown>[]} columns={columns} searchKeys={["Name", "Company", "Title", "Region"]} />
     </div>
   );
 }

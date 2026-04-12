@@ -67,6 +67,42 @@ export function CategoryBreakdownChart({ data }: { data: { name: string; value: 
   );
 }
 
+export function RegionChart({ data }: { data: { name: string; count: number }[] }) {
+  const filtered = data.filter(d => d.name !== "Unknown");
+  return (
+    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5">
+      <h3 className="text-sm font-semibold text-white mb-4">Contacts by Region</h3>
+      <ResponsiveContainer width="100%" height={360}>
+        <BarChart data={filtered} layout="vertical" margin={{ left: 10, right: 20 }}>
+          <XAxis type="number" tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} />
+          <YAxis type="category" dataKey="name" width={120} tick={{ fill: "#e4e4e7", fontSize: 12 }} axisLine={false} tickLine={false} />
+          <Tooltip {...tooltipStyle} />
+          <Bar dataKey="count" fill="#06b6d4" radius={[0, 4, 4, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function FundStageChart({ data }: { data: { name: string; count: number }[] }) {
+  return (
+    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5">
+      <h3 className="text-sm font-semibold text-white mb-4">Fund Stages (Investors)</h3>
+      <ResponsiveContainer width="100%" height={360}>
+        <PieChart>
+          <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={120} paddingAngle={3} dataKey="count" nameKey="name" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+            {data.map((_, i) => (
+              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip {...tooltipStyle} />
+          <Legend iconType="circle" wrapperStyle={{ fontSize: 12, color: "#a1a1aa" }} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function MostActiveChart({ data }: { data: { name: string; company: string; count: number }[] }) {
   return (
     <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5">

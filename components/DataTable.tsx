@@ -42,7 +42,35 @@ function PriorityBadge({ priority }: { priority: string }) {
   );
 }
 
-export { StatusBadge, PriorityBadge };
+function StageBadge({ stage }: { stage: string }) {
+  const colors: Record<string, string> = {
+    "Pre-Seed": "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    "Seed/A": "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    "Seed": "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    "Pre-Seed/Seed": "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    "Series A/B": "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    "Series B+": "bg-teal-500/10 text-teal-400 border-teal-500/20",
+    "Multi-Stage": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    "Growth": "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    "PE": "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    "Angel": "bg-sky-500/10 text-sky-400 border-sky-500/20",
+  };
+  return (
+    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${colors[stage] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
+      {stage}
+    </span>
+  );
+}
+
+function LinkedInLink({ url }: { url: string }) {
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs transition-colors">
+      LI
+    </a>
+  );
+}
+
+export { StatusBadge, PriorityBadge, StageBadge, LinkedInLink };
 
 export default function DataTable({ data, columns, pageSize = 50, searchKeys = ["Name", "Company", "Email"] }: DataTableProps) {
   const [search, setSearch] = useState("");
