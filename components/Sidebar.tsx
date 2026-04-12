@@ -15,6 +15,7 @@ const nav = [
   { href: "/south-florida", label: "South Florida", icon: "🌴" },
   { href: "/connections", label: "LinkedIn Connections", icon: "🔗" },
   { href: "/external", label: "External Lists", icon: "📑" },
+  { href: "/hubspot", label: "HubSpot Contacts", icon: "🟠" },
   { href: "/whatsapp", label: "WhatsApp Network", icon: "💬" },
   { href: "/re-engage", label: "Re-Engage", icon: "🎯" },
   { href: "/needs-review", label: "Needs Review", icon: "📋" },

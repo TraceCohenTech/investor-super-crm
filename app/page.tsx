@@ -3,6 +3,7 @@ import { TopFirmsChart, RegionChart, FundStageChart, StatusPieChart } from "@/co
 import summary from "@/data/summary.json";
 import liSummary from "@/data/linkedin-summary.json";
 import extSummary from "@/data/external-summary.json";
+import hubSummary from "@/data/hubspot-summary.json";
 
 export default function DashboardPage() {
   const statusData = [
@@ -30,6 +31,7 @@ export default function DashboardPage() {
         <StatCard label="Boston" value={summary.boston} icon="🎓" />
         <StatCard label="LinkedIn Connections" value={liSummary.total} icon="🔗" sub={`${liSummary.newToCRM.toLocaleString()} new to CRM`} />
         <StatCard label="External Lists" value={extSummary.total} icon="📑" sub={`${extSummary.newToCRM} new funds & offices`} />
+        <StatCard label="HubSpot Contacts" value={hubSummary.total} icon="🟠" sub={`${hubSummary.newToCRM.toLocaleString()} new to CRM`} />
         <StatCard label="Active (5+ emails)" value={summary.active} icon="✅" sub="Regular correspondents" />
         <StatCard label="Warm (3-4 emails)" value={summary.warm} icon="🌡️" sub="Growing relationships" />
         <StatCard label="Follow-Up Overdue" value={summary.followUpOverdue} icon="🔥" sub="Need attention" />
