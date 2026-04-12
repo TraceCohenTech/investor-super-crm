@@ -1,0 +1,115 @@
+{
+  "total": 36294,
+  "facets": {
+    "investorType": {
+      "Other": 18956,
+      "VC Fund": 8635,
+      "Founder": 4783,
+      "Executive": 3141,
+      "Family Office": 312,
+      "Legal/Services": 275,
+      "Service Provider": 122,
+      "Fund of Funds": 52,
+      "Angel/Individual": 17,
+      "Sovereign Wealth": 1
+    },
+    "region": {
+      "NYC Metro": 1415,
+      "Bay Area": 631,
+      "Other US": 199,
+      "Boston": 146,
+      "LA / SoCal": 135,
+      "South Florida": 105,
+      "International": 54,
+      "DC/DMV": 54,
+      "Colorado": 52,
+      "Chicago": 48,
+      "North America": 26,
+      "Europe": 24,
+      "Texas": 21,
+      "Canada": 19,
+      "Seattle": 19,
+      "London/UK": 12,
+      "Israel": 8,
+      "LA/SoCal": 8,
+      "Florida": 7,
+      "Asia": 6,
+      "Southeast": 4,
+      "Asia/Pacific": 3,
+      "Middle East": 1,
+      "Oceania": 1
+    },
+    "fundStage": {
+      "Angel": 2549,
+      "Series A": 95,
+      "Seed": 75,
+      "Pre-Seed": 41,
+      "Series B+": 40,
+      "Multi-Stage": 36,
+      "Growth": 27,
+      "PE": 21
+    },
+    "status": {
+      "New": 8391,
+      "Active": 1071,
+      "Warm": 855,
+      "Contacted": 556
+    },
+    "crmStatus": {
+      "New": 26463,
+      "In CRM": 9831
+    },
+    "relationshipStrength": {
+      "None": 15506,
+      "Weak": 11377,
+      "Medium": 5861,
+      "Strong": 3550
+    },
+    "roleType": {
+      "Founder/CEO": 5390,
+      "C-Suite": 2574,
+      "GP/Partner": 1996,
+      "Partner": 1976,
+      "VP": 804,
+      "Principal": 597,
+      "Associate/Analyst": 308,
+      "Managing Director": 2
+    },
+    "checkSize": {
+      "$5M+": 80,
+      "$1M-$5M": 49,
+      "$500K-$1M": 16,
+      "$100K-$500K": 12,
+      "<$100K": 3
+    },
+    "sector": {
+      "Generalist": 33631,
+      "AI/ML": 1640,
+      "Healthcare": 361,
+      "Consumer": 203,
+      "B2B SaaS": 191,
+      "Defense/Gov": 154,
+      "Fintech": 144,
+      "Climate": 129,
+      "Crypto/Web3": 107,
+      "EdTech": 67,
+      "PropTech": 21
+    },
+    "sources": {
+      "hubspot": 16091,
+      "linkedin-conn": 10577,
+      "investors": 9304,
+      "angels": 2935,
+      "linkedin": 2919,
+      "dealflow": 1510,
+      "whatsapp": 1154,
+      "follow-up": 997,
+      "external": 860,
+      "nyc": 744,
+      "legal": 411,
+      "re-engage": 397,
+      "south-florida": 112,
+      "needs-review": 68
+    }
+  }
+}

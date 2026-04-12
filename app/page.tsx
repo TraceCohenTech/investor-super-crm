@@ -4,6 +4,7 @@ import summary from "@/data/summary.json";
 import liSummary from "@/data/linkedin-summary.json";
 import extSummary from "@/data/external-summary.json";
 import hubSummary from "@/data/hubspot-summary.json";
+import searchMeta from "@/data/search-meta.json";
 
 export default function DashboardPage() {
   const statusData = [
@@ -21,6 +22,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Unified Contacts" value={searchMeta.total} icon="🔍" sub="Deduped across all sources" />
         <StatCard label="Total Contacts" value={summary.totalContacts} icon="📊" />
         <StatCard label="Investors & Funds" value={summary.investorsAndFunds} icon="🏦" />
         <StatCard label="Angels" value={summary.angelsAndIndividuals} icon="👼" />
