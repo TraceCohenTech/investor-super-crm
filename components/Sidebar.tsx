@@ -20,6 +20,7 @@ const nav = [
   { href: "/whatsapp", label: "WhatsApp Network", icon: "💬" },
   { href: "/re-engage", label: "Re-Engage", icon: "🎯" },
   { href: "/needs-review", label: "Needs Review", icon: "📋" },
+  { href: "/dedup", label: "Dedup Review", icon: "🔄" },
 ];
 
 export default function Sidebar() {

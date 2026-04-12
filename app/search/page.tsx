@@ -1,33 +1,14 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-
-interface Record {
-  id: string;
-  n: string;   // name
-  e: string;   // email
-  c: string;   // company
-  t: string;   // title
-  li: string;  // linkedin
-  src: string[];
-  st: string;  // status
-  rg: string;  // region
-  ct: string;  // city
-  fs: string;  // fund stage
-  sc: string[];// sectors
-  pr: string;  // priority
-  crm: string;
-  it: string;  // investor type
-  rt: string;  // role type
-  cs: string;  // check size
-  rs: string;  // relationship strength
-  wg: string[];// whatsapp groups
-}
-
-interface SearchData {
-  records: Record[];
-  facets: { [key: string]: { [key: string]: number } };
-}
+import { useState, useMemo, useEffect, useCallback } from "react";
+import Link from "next/link";
+import type { ContactRecord, SearchData } from "@/lib/types";
+import {
+  SOURCE_LABELS as SRC_LABELS,
+  GRADE_COLORS,
+  STALENESS_CONFIG,
+  STRENGTH_COLORS,
+} from "@/lib/types";
 
 type Filters = {
   investorType: string[];
@@ -38,92 +19,110 @@ type Filters = {
   crmStatus: string[];
   relationshipStrength: string[];
   sources: string[];
+  qualityGrade: string[];
+  staleness: string[];
+  tags: string[];
 };
 
 const EMPTY_FILTERS: Filters = {
   investorType: [], region: [], fundStage: [], sector: [],
   status: [], crmStatus: [], relationshipStrength: [], sources: [],
+  qualityGrade: [], staleness: [], tags: [],
 };
 
-const PRESETS: { label: string; icon: string; filters: Partial<Filters> }[] = [
+type SavedSearch = {
+  name: string;
+  filters: Filters;
+  query: string;
+  createdAt: string;
+};
+
+const PRESETS: { label: string; icon: string; filters: Partial<Filters>; query?: string }[] = [
   { label: "Active VCs in NYC", icon: "🗽", filters: { investorType: ["VC Fund"], region: ["NYC Metro"], status: ["Active"] } },
-  { label: "Pre-Seed Funds", icon: "🌱", filters: { fundStage: ["Pre-Seed", "Seed"], investorType: ["VC Fund"] } },
-  { label: "AI Investors", icon: "🤖", filters: { sector: ["AI/ML"] } },
-  { label: "Family Offices", icon: "🏠", filters: { investorType: ["Family Office"] } },
-  { label: "Fund of Funds", icon: "🏛️", filters: { investorType: ["Fund of Funds"] } },
-  { label: "New from WhatsApp", icon: "💬", filters: { sources: ["whatsapp"], crmStatus: ["New"] } },
-  { label: "Founders Not in CRM", icon: "🚀", filters: { investorType: ["Founder"], crmStatus: ["New"] } },
+  { label: "Pre-Seed Funds", icon: "🌱", filters: { fundStage: ["Pre-Seed", "Seed", "Pre-Seed/Seed"], investorType: ["VC Fund"] } },
+  { label: "AI Investors", icon: "🤖", filters: { sector: ["AI/ML", "Applied AI"] } },
+  { label: "Family Offices", icon: "🏠", filters: { investorType: ["Family Office", "LP/Family Office"] } },
+  { label: "LP Pipeline", icon: "🏛️", filters: { sources: ["lp-pipeline"] } },
+  { label: "Going Cold", icon: "🥶", filters: { staleness: ["stale"] } },
+  { label: "At Risk", icon: "⚠️", filters: { staleness: ["at-risk"] } },
+  { label: "Grade A Contacts", icon: "⭐", filters: { qualityGrade: ["A"] } },
   { label: "Strong Relationships", icon: "💪", filters: { relationshipStrength: ["Strong"] } },
-  { label: "Fintech Focus", icon: "💳", filters: { sector: ["Fintech"] } },
-  { label: "Healthcare", icon: "🏥", filters: { sector: ["Healthcare"] } },
+  { label: "Israel Network", icon: "🇮🇱", filters: { tags: ["israel"] } },
+  { label: "New from WhatsApp", icon: "💬", filters: { sources: ["whatsapp"], crmStatus: ["New"] } },
+  { label: "Founders", icon: "🚀", filters: { investorType: ["Founder/Executive", "Startup/Founder"] } },
 ];
 
-const SOURCE_COLORS: { [key: string]: string } = {
+const DOT_COLORS: { [key: string]: string } = {
   investors: "bg-blue-400", angels: "bg-sky-400", hubspot: "bg-orange-400",
-  linkedin: "bg-cyan-400", "linkedin-conn": "bg-cyan-300", whatsapp: "bg-emerald-400",
+  linkedin: "bg-cyan-400", "linkedin-verified": "bg-cyan-300", whatsapp: "bg-emerald-400",
   dealflow: "bg-rose-400", external: "bg-indigo-400", legal: "bg-amber-400",
   "follow-up": "bg-red-400", nyc: "bg-blue-300", "south-florida": "bg-teal-400",
-  "re-engage": "bg-pink-400", "needs-review": "bg-zinc-400",
+  "re-engage": "bg-pink-400", "needs-review": "bg-zinc-400", "lp-pipeline": "bg-violet-400",
+  gmail: "bg-red-400", calendar: "bg-blue-400", israel: "bg-sky-400",
 };
 
-const SOURCE_LABELS: { [key: string]: string } = {
-  investors: "Investors", angels: "Angels", hubspot: "HubSpot",
-  linkedin: "LinkedIn", "linkedin-conn": "LI Connections", whatsapp: "WhatsApp",
-  dealflow: "Deal Flow", external: "External", legal: "Legal",
-  "follow-up": "Follow-Up", nyc: "NYC", "south-florida": "S. Florida",
-  "re-engage": "Re-Engage", "needs-review": "Review",
-};
+function GradeBadge({ grade }: { grade: string }) {
+  if (!grade) return null;
+  return <span className={`inline-flex px-1.5 py-0.5 text-[9px] font-bold rounded-full border ${GRADE_COLORS[grade] || ""}`}>{grade}</span>;
+}
+
+function StalenessBadge({ level }: { level: string }) {
+  const cfg = STALENESS_CONFIG[level];
+  if (!cfg) return null;
+  return <span className={`inline-flex px-1.5 py-0.5 text-[9px] font-medium rounded-full border ${cfg.color}`}>{cfg.label}</span>;
+}
 
 function TypeBadge({ type }: { type: string }) {
   const colors: { [key: string]: string } = {
     "VC Fund": "bg-blue-500/10 text-blue-400 border-blue-500/20",
     "Family Office": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     "Fund of Funds": "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-    "Angel/Individual": "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    "Founder": "bg-rose-500/10 text-rose-400 border-rose-500/20",
-    "Executive": "bg-sky-500/10 text-sky-400 border-sky-500/20",
-    "Legal/Services": "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-    "Other": "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    "Individual/Angel": "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    "Founder/Executive": "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    "Angel/Syndicate": "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    "LP": "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    "LP/Family Office": "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    "Corporate": "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    "University": "bg-sky-500/10 text-sky-400 border-sky-500/20",
   };
   if (!type) return null;
-  return <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${colors[type] || colors.Other}`}>{type}</span>;
+  return <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${colors[type] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>{type}</span>;
 }
 
 function StrengthBadge({ strength }: { strength: string }) {
-  const colors: { [key: string]: string } = {
-    "Strong": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    "Medium": "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    "Weak": "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-  };
   if (!strength || strength === "None") return <span className="text-[#52525b] text-[10px]">-</span>;
-  return <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${colors[strength] || ""}`}>{strength}</span>;
+  return <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${STRENGTH_COLORS[strength] || ""}`}>{strength}</span>;
 }
 
 function SourceDots({ sources }: { sources: string[] }) {
   return (
-    <div className="flex gap-1 items-center" title={sources.map(s => SOURCE_LABELS[s] || s).join(", ")}>
+    <div className="flex gap-1 items-center" title={sources.map(s => SRC_LABELS[s] || s).join(", ")}>
       {sources.map(s => (
-        <span key={s} className={`w-2 h-2 rounded-full ${SOURCE_COLORS[s] || "bg-zinc-400"}`} />
+        <span key={s} className={`w-2 h-2 rounded-full ${DOT_COLORS[s] || "bg-zinc-400"}`} />
       ))}
     </div>
   );
 }
 
-function FacetRow({ label, facetKey, counts, selected, onToggle }: {
+function FacetRow({ label, facetKey, counts, selected, onToggle, maxItems = 20 }: {
   label: string;
   facetKey: string;
   counts: { [key: string]: number };
   selected: string[];
   onToggle: (key: string, value: string) => void;
+  maxItems?: number;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const items = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   if (items.length === 0) return null;
+  const visible = expanded ? items : items.slice(0, maxItems);
+  const hasMore = items.length > maxItems;
 
   return (
     <div className="flex items-start gap-2">
       <span className="text-[10px] text-[#52525b] w-16 shrink-0 pt-1.5 text-right">{label}</span>
       <div className="flex flex-wrap gap-1.5">
-        {items.map(([value, count]) => {
+        {visible.map(([value, count]) => {
           const active = selected.includes(value);
           return (
             <button
@@ -135,14 +134,30 @@ function FacetRow({ label, facetKey, counts, selected, onToggle }: {
                   : "bg-[#18181b] border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46]"
               }`}
             >
-              {facetKey === "sources" ? (SOURCE_LABELS[value] || value) : value}
+              {facetKey === "sources" ? (SRC_LABELS[value] || value) : value}
               <span className={`ml-1 ${active ? "text-[#3b82f6]/60" : "text-[#52525b]"}`}>{count.toLocaleString()}</span>
             </button>
           );
         })}
+        {hasMore && (
+          <button onClick={() => setExpanded(!expanded)} className="px-2 py-1 text-[10px] text-[#52525b] hover:text-white transition-colors">
+            {expanded ? "Show less" : `+${items.length - maxItems} more`}
+          </button>
+        )}
       </div>
     </div>
   );
+}
+
+const SAVED_KEY = "nyvp-saved-searches";
+function loadSaved(): SavedSearch[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
+  } catch { return []; }
+}
+function persistSaved(searches: SavedSearch[]) {
+  localStorage.setItem(SAVED_KEY, JSON.stringify(searches));
 }
 
 export default function SearchPage() {
@@ -154,6 +169,9 @@ export default function SearchPage() {
   const [page, setPage] = useState(0);
   const [sortKey, setSortKey] = useState<string>("n");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveName, setSaveName] = useState("");
   const pageSize = 50;
 
   useEffect(() => {
@@ -163,7 +181,11 @@ export default function SearchPage() {
     });
   }, []);
 
-  function toggleFilter(key: string, value: string) {
+  useEffect(() => {
+    setSavedSearches(loadSaved());
+  }, []);
+
+  const toggleFilter = useCallback((key: string, value: string) => {
     setActivePreset(null);
     setFilters(prev => {
       const dim = key as keyof Filters;
@@ -174,17 +196,18 @@ export default function SearchPage() {
       return { ...prev, [dim]: next };
     });
     setPage(0);
-  }
+  }, []);
 
   function applyPreset(preset: typeof PRESETS[number]) {
     if (activePreset === preset.label) {
       setActivePreset(null);
       setFilters({ ...EMPTY_FILTERS });
+      setQuery("");
     } else {
       setActivePreset(preset.label);
       setFilters({ ...EMPTY_FILTERS, ...preset.filters } as Filters);
+      setQuery(preset.query || "");
     }
-    setQuery("");
     setPage(0);
   }
 
@@ -195,23 +218,50 @@ export default function SearchPage() {
     setPage(0);
   }
 
+  function saveSearch() {
+    if (!saveName.trim()) return;
+    const s: SavedSearch = {
+      name: saveName.trim(),
+      filters: { ...filters },
+      query,
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [...savedSearches, s];
+    setSavedSearches(updated);
+    persistSaved(updated);
+    setSaveName("");
+    setShowSaveModal(false);
+  }
+
+  function deleteSaved(idx: number) {
+    const updated = savedSearches.filter((_, i) => i !== idx);
+    setSavedSearches(updated);
+    persistSaved(updated);
+  }
+
+  function applySaved(s: SavedSearch) {
+    setFilters({ ...EMPTY_FILTERS, ...s.filters });
+    setQuery(s.query || "");
+    setActivePreset(null);
+    setPage(0);
+  }
+
   const hasFilters = query || Object.values(filters).some(f => f.length > 0);
 
-  // Build search text index once
+  // Build search text index once (includes tags)
   const searchTexts = useMemo(() => {
     if (!data) return [];
-    return data.records.map(r =>
-      `${r.n} ${r.c} ${r.t} ${r.e} ${r.sc.join(" ")} ${r.rg} ${r.it} ${r.fs}`.toLowerCase()
+    return data.records.map((r: ContactRecord) =>
+      `${r.n} ${r.c} ${r.t} ${r.e} ${r.sc.join(" ")} ${r.rg} ${r.it} ${r.fs} ${(r.tg || []).join(" ")} ${(r.wg || []).join(" ")} ${r.nt || ""}`.toLowerCase()
     );
   }, [data]);
 
   // Filter records
   const filtered = useMemo(() => {
     if (!data) return [];
-    const results = data.records;
+    const results = data.records as ContactRecord[];
     let indices = results.map((_, i) => i);
 
-    // Text search
     if (query) {
       const q = query.toLowerCase();
       const terms = q.split(/\s+/).filter(Boolean);
@@ -220,8 +270,7 @@ export default function SearchPage() {
       );
     }
 
-    // Facet filters (AND between dimensions, OR within)
-    const filterMap: [keyof Filters, (r: Record) => string | string[]][] = [
+    const filterMap: [keyof Filters, (r: ContactRecord) => string | string[]][] = [
       ["investorType", r => r.it],
       ["region", r => r.rg],
       ["fundStage", r => r.fs],
@@ -230,6 +279,9 @@ export default function SearchPage() {
       ["crmStatus", r => r.crm],
       ["relationshipStrength", r => r.rs],
       ["sources", r => r.src],
+      ["qualityGrade", r => r.q],
+      ["staleness", r => r.sl],
+      ["tags", r => r.tg || []],
     ];
 
     for (const [dim, accessor] of filterMap) {
@@ -250,7 +302,7 @@ export default function SearchPage() {
   // Dynamic facet counts
   const dynamicFacets = useMemo(() => {
     const counts: { [dim: string]: { [val: string]: number } } = {};
-    const dims: { key: string; accessor: (r: Record) => string | string[] }[] = [
+    const dims: { key: string; accessor: (r: ContactRecord) => string | string[] }[] = [
       { key: "investorType", accessor: r => r.it },
       { key: "region", accessor: r => r.rg },
       { key: "fundStage", accessor: r => r.fs },
@@ -259,11 +311,12 @@ export default function SearchPage() {
       { key: "crmStatus", accessor: r => r.crm },
       { key: "relationshipStrength", accessor: r => r.rs },
       { key: "sources", accessor: r => r.src },
+      { key: "qualityGrade", accessor: r => r.q },
+      { key: "staleness", accessor: r => r.sl },
+      { key: "tags", accessor: r => r.tg || [] },
     ];
 
-    for (const { key } of dims) {
-      counts[key] = {};
-    }
+    for (const { key } of dims) counts[key] = {};
 
     for (const r of filtered) {
       for (const { key, accessor } of dims) {
@@ -283,11 +336,17 @@ export default function SearchPage() {
   // Sort
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
-      const fieldMap: { [key: string]: (r: Record) => string } = {
+      const fieldMap: { [key: string]: (r: ContactRecord) => string | number } = {
         n: r => r.n, c: r => r.c, t: r => r.t, it: r => r.it, rg: r => r.rg, rs: r => r.rs,
+        q: r => r.q || "Z", ec: r => r.ec || 0,
       };
       const fn = fieldMap[sortKey] || fieldMap.n;
-      const cmp = fn(a).localeCompare(fn(b));
+      const va = fn(a);
+      const vb = fn(b);
+      if (typeof va === "number" && typeof vb === "number") {
+        return sortDir === "asc" ? va - vb : vb - va;
+      }
+      const cmp = String(va).localeCompare(String(vb));
       return sortDir === "asc" ? cmp : -cmp;
     });
   }, [filtered, sortKey, sortDir]);
@@ -307,7 +366,7 @@ export default function SearchPage() {
         <div className="text-center">
           <div className="text-2xl mb-3">🔍</div>
           <div className="text-sm text-[#a1a1aa]">Loading search index...</div>
-          <div className="text-xs text-[#52525b] mt-1">36,000+ contacts across 14 sources</div>
+          <div className="text-xs text-[#52525b] mt-1">24,000+ contacts from master CRM</div>
         </div>
       </div>
     );
@@ -319,9 +378,26 @@ export default function SearchPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white">🔍 Smart Search</h1>
         <p className="text-sm text-[#a1a1aa] mt-1">
-          {data ? data.records.length.toLocaleString() : "..."} contacts across 14 sources — search by type, stage, region, sector, and more
+          {data ? data.records.length.toLocaleString() : "..."} contacts — search by type, stage, region, sector, quality, tags, and more
         </p>
       </div>
+
+      {/* Saved Searches */}
+      {savedSearches.length > 0 && (
+        <div className="flex gap-2 flex-wrap">
+          <span className="text-[10px] text-[#52525b] pt-1.5">Saved:</span>
+          {savedSearches.map((s, i) => (
+            <div key={i} className="flex items-center gap-1 bg-[#18181b] border border-[#27272a] rounded-lg px-2.5 py-1">
+              <button onClick={() => applySaved(s)} className="text-[11px] text-[#a1a1aa] hover:text-white transition-colors">
+                {s.name}
+              </button>
+              <button onClick={() => deleteSaved(i)} className="text-[10px] text-[#52525b] hover:text-red-400 ml-1 transition-colors">
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Quick Presets */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
@@ -341,12 +417,12 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Search Input */}
+      {/* Search Input + Actions */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-lg">
           <input
             type="text"
-            placeholder="Search by name, company, title, email, sector..."
+            placeholder="Search name, company, title, email, sector, tags..."
             value={query}
             onChange={(e) => { setQuery(e.target.value); setPage(0); setActivePreset(null); }}
             className="w-full bg-[#18181b] border border-[#27272a] rounded-lg pl-4 pr-10 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:border-[#3b82f6] transition-colors"
@@ -358,15 +434,43 @@ export default function SearchPage() {
           )}
         </div>
         {hasFilters && (
-          <button onClick={clearAll} className="px-3 py-2.5 text-xs rounded-lg bg-[#27272a] text-[#a1a1aa] hover:text-white transition-colors whitespace-nowrap">
-            Clear all
-          </button>
+          <>
+            <button onClick={() => setShowSaveModal(true)} className="px-3 py-2.5 text-xs rounded-lg bg-[#3b82f6]/10 border border-[#3b82f6]/30 text-[#3b82f6] hover:bg-[#3b82f6]/20 transition-colors whitespace-nowrap">
+              Save Search
+            </button>
+            <button onClick={clearAll} className="px-3 py-2.5 text-xs rounded-lg bg-[#27272a] text-[#a1a1aa] hover:text-white transition-colors whitespace-nowrap">
+              Clear all
+            </button>
+          </>
         )}
         <span className="text-xs text-[#a1a1aa] whitespace-nowrap">{filtered.length.toLocaleString()} results</span>
       </div>
 
+      {/* Save Search Modal */}
+      {showSaveModal && (
+        <div className="bg-[#18181b] border border-[#3b82f6]/30 rounded-xl p-4 flex items-center gap-3">
+          <input
+            type="text"
+            placeholder="Name this search..."
+            value={saveName}
+            onChange={(e) => setSaveName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && saveSearch()}
+            autoFocus
+            className="flex-1 bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:border-[#3b82f6] transition-colors"
+          />
+          <button onClick={saveSearch} className="px-4 py-2 text-xs rounded-lg bg-[#3b82f6] text-white hover:bg-[#2563eb] transition-colors">
+            Save
+          </button>
+          <button onClick={() => { setShowSaveModal(false); setSaveName(""); }} className="px-3 py-2 text-xs text-[#a1a1aa] hover:text-white transition-colors">
+            Cancel
+          </button>
+        </div>
+      )}
+
       {/* Facet Filters */}
       <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-4 space-y-2.5">
+        <FacetRow label="Quality" facetKey="qualityGrade" counts={dynamicFacets.qualityGrade || {}} selected={filters.qualityGrade} onToggle={toggleFilter} />
+        <FacetRow label="Health" facetKey="staleness" counts={dynamicFacets.staleness || {}} selected={filters.staleness} onToggle={toggleFilter} />
         <FacetRow label="Type" facetKey="investorType" counts={dynamicFacets.investorType || {}} selected={filters.investorType} onToggle={toggleFilter} />
         <FacetRow label="Stage" facetKey="fundStage" counts={dynamicFacets.fundStage || {}} selected={filters.fundStage} onToggle={toggleFilter} />
         <FacetRow label="Region" facetKey="region" counts={dynamicFacets.region || {}} selected={filters.region} onToggle={toggleFilter} />
@@ -375,6 +479,7 @@ export default function SearchPage() {
         <FacetRow label="CRM" facetKey="crmStatus" counts={dynamicFacets.crmStatus || {}} selected={filters.crmStatus} onToggle={toggleFilter} />
         <FacetRow label="Strength" facetKey="relationshipStrength" counts={dynamicFacets.relationshipStrength || {}} selected={filters.relationshipStrength} onToggle={toggleFilter} />
         <FacetRow label="Source" facetKey="sources" counts={dynamicFacets.sources || {}} selected={filters.sources} onToggle={toggleFilter} />
+        <FacetRow label="Tags" facetKey="tags" counts={dynamicFacets.tags || {}} selected={filters.tags} onToggle={toggleFilter} maxItems={15} />
       </div>
 
       {/* Results Table */}
@@ -392,30 +497,34 @@ export default function SearchPage() {
                 Title {sortKey === "t" && (sortDir === "asc" ? "↑" : "↓")}
               </th>
               <th>Type</th>
-              <th>Stage</th>
-              <th className="cursor-pointer select-none" onClick={() => toggleSort("rg")}>
-                Region {sortKey === "rg" && (sortDir === "asc" ? "↑" : "↓")}
+              <th className="cursor-pointer select-none" onClick={() => toggleSort("q")}>
+                Grade {sortKey === "q" && (sortDir === "asc" ? "↑" : "↓")}
               </th>
+              <th>Health</th>
               <th>Strength</th>
               <th>Sources</th>
-              <th>Contact</th>
+              <th>Links</th>
             </tr>
           </thead>
           <tbody>
             {paged.map((r) => (
               <tr key={r.id}>
-                <td className="font-medium text-white whitespace-nowrap">{r.n}</td>
+                <td className="font-medium whitespace-nowrap">
+                  <Link href={`/contact/${r.id}`} className="text-white hover:text-[#3b82f6] transition-colors">
+                    {r.n}
+                  </Link>
+                </td>
                 <td className="text-[#a1a1aa] text-xs max-w-[160px] truncate">{r.c || "—"}</td>
                 <td className="text-[#a1a1aa] text-xs max-w-[200px] truncate">{r.t || "—"}</td>
                 <td><TypeBadge type={r.it} /></td>
-                <td className="text-xs text-[#a1a1aa] whitespace-nowrap">{r.fs || "—"}</td>
-                <td className="text-xs text-[#a1a1aa] whitespace-nowrap">{r.rg || "—"}</td>
+                <td><GradeBadge grade={r.q} /></td>
+                <td><StalenessBadge level={r.sl} /></td>
                 <td><StrengthBadge strength={r.rs} /></td>
                 <td><SourceDots sources={r.src} /></td>
                 <td className="flex items-center gap-2">
                   {r.e && <a href={`mailto:${r.e}`} className="text-cyan-400 hover:text-cyan-300 text-xs">Email</a>}
                   {r.li && <a href={r.li} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">LI</a>}
-                  {!r.e && !r.li && <span className="text-[#52525b] text-xs">—</span>}
+                  <Link href={`/contact/${r.id}#intros`} className="text-emerald-400 hover:text-emerald-300 text-[10px]">Intro</Link>
                 </td>
               </tr>
             ))}

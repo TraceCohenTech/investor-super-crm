@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-NYVP Investor CRM — Enrichment & Unified Search Index Builder
+NYVP Investor CRM — Enrichment & Unified Search Index Builder (v2)
 
-Reads all 14 JSON data sources, infers missing tags, deduplicates
-across sources, and writes a unified search index for the Smart Search page.
+Primary source: NYVP_Investor_CRM.xlsx (master Excel with curated tags)
+Fallback: existing JSON data files for records not in Excel
+Outputs: search-index.json, search-meta.json, dedup-candidates.json
 """
 
 import json
@@ -11,76 +12,45 @@ import os
 import re
 import hashlib
 from collections import Counter, defaultdict
+from datetime import datetime, timedelta
+from difflib import SequenceMatcher
+
+try:
+    import openpyxl
+except ImportError:
+    print("Installing openpyxl...")
+    import subprocess
+    subprocess.check_call(["pip3", "install", "openpyxl"])
+    import openpyxl
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+EXCEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "NYVP_Investor_CRM.xlsx")
+TODAY = datetime.now()
 
-# ─── Known firm HQ lookup (top 200 firms) ───
-FIRM_HQ = {
-    "a16z": "Bay Area", "andreessen horowitz": "Bay Area", "sequoia": "Bay Area",
-    "benchmark": "Bay Area", "greylock": "Bay Area", "accel": "Bay Area",
-    "kleiner perkins": "Bay Area", "lightspeed": "Bay Area", "index ventures": "Bay Area",
-    "bessemer": "Bay Area", "general catalyst": "Bay Area", "khosla": "Bay Area",
-    "nea": "Bay Area", "battery ventures": "Boston", "ivp": "Bay Area",
-    "gv": "Bay Area", "insight partners": "NYC Metro", "tiger global": "NYC Metro",
-    "coatue": "NYC Metro", "thrive capital": "NYC Metro", "union square ventures": "NYC Metro",
-    "lerer hippeau": "NYC Metro", "firstmark": "NYC Metro", "rre ventures": "NYC Metro",
-    "greycroft": "NYC Metro", "box group": "NYC Metro", "boxgroup": "NYC Metro",
-    "primary venture": "NYC Metro", "boldstart": "NYC Metro", "nyca partners": "NYC Metro",
-    "bain capital": "Boston", "general atlantic": "NYC Metro", "spark capital": "Boston",
-    "floodgate": "Bay Area", "founder collective": "Boston", "flybridge": "Boston",
-    "underscore vc": "Boston", "pillar vc": "Boston", "modern ventures": "Chicago",
-    "hyde park": "Chicago", "m25": "Chicago", "origin ventures": "Chicago",
-    "pritzker": "Chicago", "valor equity": "Chicago",
-    "softbank": "Bay Area", "y combinator": "Bay Area", "500 global": "Bay Area",
-    "techstars": "Colorado", "first round": "Bay Area", "true ventures": "Bay Area",
-    "upfront ventures": "LA/SoCal", "bonfire ventures": "LA/SoCal",
-    "crosscut ventures": "LA/SoCal", "amplify.la": "LA/SoCal", "mucker capital": "LA/SoCal",
-    "revolution": "DC/DMV", "steve case": "DC/DMV", "aol": "DC/DMV",
-    "initialized capital": "Bay Area", "craft ventures": "Bay Area",
-    "maverick ventures": "Bay Area", "redpoint": "Bay Area",
-    "social capital": "Bay Area", "ribbit capital": "Bay Area",
-    "paradigm": "Bay Area", "haun ventures": "Bay Area",
-    "ggv capital": "Bay Area", "canaan partners": "Bay Area",
-    "felicis": "Bay Area", "cowboy ventures": "Bay Area",
-    "slow ventures": "Bay Area", "founders fund": "Bay Area",
-    "8vc": "Bay Area", "tribe capital": "Bay Area",
-    "kkr": "NYC Metro", "blackstone": "NYC Metro", "carlyle": "DC/DMV",
-    "apollo": "NYC Metro", "warburg pincus": "NYC Metro",
-    "goldman sachs": "NYC Metro", "morgan stanley": "NYC Metro", "jpmorgan": "NYC Metro",
-    "citi": "NYC Metro", "citigroup": "NYC Metro",
-    "cooley": "Bay Area", "wilson sonsini": "Bay Area", "fenwick": "Bay Area",
-    "goodwin": "Boston", "mintz": "Boston", "gunderson": "Bay Area",
-    "carta": "Bay Area", "stripe": "Bay Area", "plaid": "Bay Area",
+# ─── Sector normalization ───
+SECTOR_NORMALIZE = {
+    "ai": "AI/ML", "ml": "AI/ML", "machine learning": "AI/ML", "artificial intelligence": "AI/ML",
+    "llm": "AI/ML", "generative ai": "AI/ML", "deep learning": "AI/ML", "applied ai": "Applied AI",
+    "deep tech": "Deep Tech", "defense tech": "Defense Tech",
+    "saas": "B2B SaaS", "enterprise": "B2B SaaS", "enterprise saas": "B2B SaaS",
+    "fintech": "Fintech", "insurtech": "Fintech",
+    "health": "Healthcare", "biotech": "Healthcare", "medtech": "Healthcare",
+    "climate": "Climate", "sustainability": "Climate", "cleantech": "Climate",
+    "crypto": "Crypto/Web3", "web3": "Crypto/Web3", "blockchain": "Crypto/Web3",
+    "defense": "Defense/Gov", "military": "Defense/Gov", "govtech": "Defense/Gov",
+    "consumer": "Consumer", "d2c": "Consumer", "e-commerce": "Consumer",
+    "proptech": "PropTech", "real estate": "PropTech", "construction tech": "PropTech",
+    "edtech": "EdTech", "education": "EdTech",
+    "b2b saas": "B2B SaaS",
 }
 
-# ─── Sector keyword mapping ───
-SECTOR_KEYWORDS = {
-    "AI/ML": ["ai", "artificial intelligence", "machine learning", "deep learning", "nlp",
-              "computer vision", "generative ai", "llm", "neural", "gpt"],
-    "Fintech": ["fintech", "finance tech", "payments", "banking tech", "neobank",
-                "lending", "insurtech", "regtech", "defi"],
-    "Healthcare": ["health", "biotech", "medtech", "pharma", "clinical", "genomics",
-                   "telemedicine", "digital health", "life science"],
-    "B2B SaaS": ["saas", "enterprise software", "b2b software", "cloud platform",
-                 "devtools", "developer tools", "infrastructure"],
-    "Consumer": ["consumer", "d2c", "direct to consumer", "e-commerce", "ecommerce",
-                 "marketplace", "social media", "gaming", "entertainment"],
-    "Crypto/Web3": ["crypto", "web3", "blockchain", "token", "defi", "nft", "dao",
-                    "decentralized"],
-    "Climate": ["climate", "cleantech", "clean energy", "sustainability", "carbon",
-                "renewable", "greentech", "energy transition"],
-    "Defense/Gov": ["defense", "military", "government", "govtech", "national security",
-                    "aerospace", "space"],
-    "PropTech": ["proptech", "real estate tech", "property tech", "construction tech"],
-    "EdTech": ["edtech", "education", "learning platform", "lms"],
+# Known short sector labels to keep as-is
+KNOWN_SECTORS = {
+    "AI/ML", "Applied AI", "Deep Tech", "Defense Tech", "B2B SaaS", "Fintech",
+    "Healthcare", "Climate", "Crypto/Web3", "Defense/Gov", "Consumer", "PropTech",
+    "EdTech", "Media/Content", "Generalist", "Multi-Stage", "Credit/PE",
+    "Tech", "Enterprise SaaS",
 }
-
-# ─── Investor type inference ───
-VC_KEYWORDS = ["venture", "capital", "partners", "vc", "fund", "investment"]
-FO_KEYWORDS = ["family office", "family investment", "private office", "wealth management"]
-FOF_KEYWORDS = ["fund of funds", "fund-of-funds"]
-LEGAL_KEYWORDS = ["law", "legal", "attorney", "counsel", "llp"]
-SERVICE_KEYWORDS = ["bank", "advisory", "consulting", "accounting", "audit"]
 
 # ─── Role type inference ───
 ROLE_MAP = [
@@ -95,6 +65,25 @@ ROLE_MAP = [
     (["managing director", " md "], "Managing Director"),
 ]
 
+# ─── Nickname variants for fuzzy dedup ───
+NICKNAMES = {
+    "robert": ["rob", "bob", "bobby"], "william": ["will", "bill", "billy"],
+    "james": ["jim", "jimmy"], "richard": ["rick", "dick"],
+    "michael": ["mike", "mick"], "joseph": ["joe"],
+    "thomas": ["tom", "tommy"], "christopher": ["chris"],
+    "matthew": ["matt"], "daniel": ["dan", "danny"],
+    "nicholas": ["nick"], "benjamin": ["ben"],
+    "jonathan": ["jon", "john"], "anthony": ["tony"],
+    "elizabeth": ["liz", "beth"], "jennifer": ["jen"],
+    "katherine": ["kate", "kathy", "katie"], "alexander": ["alex"],
+    "samuel": ["sam"], "nathaniel": ["nate", "nathan"],
+    "joshua": ["josh"], "andrew": ["andy", "drew"],
+    "timothy": ["tim"], "stephen": ["steve"],
+    "david": ["dave"], "edward": ["ed", "ted"],
+    "gregory": ["greg"], "lawrence": ["larry"],
+    "phillip": ["phil"], "jp": ["j.p."], "j.p.": ["jp"],
+}
+
 
 def load_json(filename):
     path = os.path.join(DATA_DIR, filename)
@@ -105,52 +94,35 @@ def load_json(filename):
 
 
 def clean_name(name):
-    """Normalize a name: strip credentials, extra whitespace, fix casing."""
     if not name:
         return ""
-    # Strip common suffixes
     name = re.sub(r",?\s*(Ph\.?D\.?|MD|MBA|CFA|CPA|Esq\.?|Jr\.?|Sr\.?|III|II|IV)\s*$", "", name, flags=re.IGNORECASE)
     name = re.sub(r"\s+", " ", name).strip()
-    # If name looks like an email, return empty
     if "@" in name:
         return ""
     return name
 
 
-def infer_investor_type(record):
-    """Infer the investor type from available fields."""
-    company = (record.get("company") or "").lower()
-    title = (record.get("title") or "").lower()
-    category = (record.get("_category") or "").lower()
-    source = record.get("_primary_source", "")
-
-    if any(k in category for k in FOF_KEYWORDS) or any(k in company for k in FOF_KEYWORDS):
-        return "Fund of Funds"
-    if any(k in category for k in ["family office"]) or any(k in company for k in FO_KEYWORDS):
-        return "Family Office"
-    if "sovereign" in category:
-        return "Sovereign Wealth"
-    if source == "legal" or any(k in company for k in LEGAL_KEYWORDS):
-        return "Legal/Services"
-    if any(k in title for k in ["founder", "co-founder", "cofounder", "ceo"]) and not any(k in company for k in VC_KEYWORDS):
-        return "Founder"
-    if category in ["vc fund", "investor/vc"] or any(k in company for k in VC_KEYWORDS):
-        return "VC Fund"
-    if source == "angels" or "angel" in category:
-        return "Angel/Individual"
-    if any(k in title for k in ["cto", "cfo", "coo", "vp ", "vice president", "director", "head of"]):
-        return "Executive"
-    if any(k in company for k in SERVICE_KEYWORDS):
-        return "Service Provider"
-    if category == "founder":
-        return "Founder"
-    if category == "executive":
-        return "Executive"
-    return "Other"
+def normalize_sector(raw):
+    """Normalize a sector string to a short label."""
+    if not raw or raw == "None" or raw == "Unknown":
+        return "Generalist"
+    raw = raw.strip()
+    # Already a known short label
+    if raw in KNOWN_SECTORS:
+        return raw
+    # Try keyword matching on long descriptions
+    lower = raw.lower()
+    for keyword, label in sorted(SECTOR_NORMALIZE.items(), key=lambda x: -len(x[0])):
+        if keyword in lower:
+            return label
+    # If it's short enough, keep it
+    if len(raw) <= 25:
+        return raw
+    return "Generalist"
 
 
 def infer_role_type(title):
-    """Infer role type from title."""
     if not title:
         return ""
     t = f" {title.lower()} "
@@ -160,78 +132,10 @@ def infer_role_type(title):
     return ""
 
 
-def infer_sectors(record):
-    """Infer sector tags from all text fields."""
-    text = " ".join([
-        record.get("company", ""),
-        record.get("title", ""),
-        record.get("_focus", ""),
-        record.get("_description", ""),
-        " ".join(record.get("_sector_hints", [])),
-    ]).lower()
-
-    sectors = []
-    for sector, keywords in SECTOR_KEYWORDS.items():
-        if any(k in text for k in keywords):
-            sectors.append(sector)
-    return sectors if sectors else ["Generalist"]
-
-
-def infer_region(record):
-    """Try to fill in missing region from known firm HQs, city, etc."""
-    region = record.get("region", "")
-    if region and region != "Unknown":
-        return region
-
-    city = (record.get("city") or "").lower()
-    company = (record.get("company") or "").lower()
-    hq = (record.get("_headquarters") or "").lower()
-
-    # Check city
-    if any(c in city for c in ["new york", "nyc", "brooklyn", "manhattan", "queens", "bronx", "jersey city", "hoboken"]):
-        return "NYC Metro"
-    if any(c in city for c in ["san francisco", "palo alto", "menlo park", "mountain view", "sunnyvale", "cupertino", "san jose", "oakland"]):
-        return "Bay Area"
-    if any(c in city for c in ["boston", "cambridge", "somerville"]):
-        return "Boston"
-    if any(c in city for c in ["los angeles", "santa monica", "venice", "beverly hills", "hollywood", "pasadena"]):
-        return "LA/SoCal"
-    if any(c in city for c in ["miami", "fort lauderdale", "boca raton", "palm beach", "delray"]):
-        return "South Florida"
-    if any(c in city for c in ["washington", "dc", "arlington", "bethesda", "mclean"]):
-        return "DC/DMV"
-    if any(c in city for c in ["chicago", "evanston"]):
-        return "Chicago"
-    if any(c in city for c in ["seattle", "bellevue", "redmond"]):
-        return "Seattle"
-    if any(c in city for c in ["austin", "dallas", "houston", "san antonio"]):
-        return "Texas"
-    if any(c in city for c in ["denver", "boulder"]):
-        return "Colorado"
-
-    # Check HQ field (from external lists)
-    for region_name, cities in [
-        ("NYC Metro", ["new york"]), ("Bay Area", ["san francisco", "palo alto", "menlo park"]),
-        ("Boston", ["boston"]), ("LA/SoCal", ["los angeles"]), ("South Florida", ["miami"]),
-        ("DC/DMV", ["washington"]), ("Chicago", ["chicago"]),
-    ]:
-        if any(c in hq for c in cities):
-            return region_name
-
-    # Check company name against known firms
-    for firm_key, firm_region in FIRM_HQ.items():
-        if firm_key in company:
-            return firm_region
-
-    return ""
-
-
 def parse_check_size(raw):
-    """Parse check size string into a range bucket."""
     if not raw:
         return ""
     raw = raw.lower().replace(",", "").replace(" ", "")
-    # Find dollar amounts
     amounts = re.findall(r'\$?([\d.]+)\s*([kmb])?', raw)
     if not amounts:
         return ""
@@ -245,7 +149,7 @@ def parse_check_size(raw):
                 n *= 1_000_000
             elif unit == "b":
                 n *= 1_000_000_000
-            elif n < 100:  # likely already in millions if no unit and small number
+            elif n < 100:
                 n *= 1_000_000
             parsed.append(n)
         except ValueError:
@@ -264,274 +168,358 @@ def parse_check_size(raw):
     return "$5M+"
 
 
-def compute_strength(record):
-    """Compute relationship strength from engagement signals."""
-    emails = record.get("_email_count", 0)
-    messages = record.get("_wa_messages", 0)
-    sources = len(record.get("sources", []))
-    in_crm = record.get("_in_crm", False)
-
-    if emails >= 5 or messages >= 50 or sources >= 3:
+def compute_strength(email_count, wa_groups_count, sources_count, in_crm):
+    if email_count >= 5 or sources_count >= 4:
         return "Strong"
-    if emails >= 2 or messages >= 10 or sources >= 2:
+    if email_count >= 2 or wa_groups_count >= 1 or sources_count >= 2:
         return "Medium"
-    if emails >= 1 or messages >= 1 or in_crm:
+    if email_count >= 1 or in_crm:
         return "Weak"
     return "None"
 
 
-def normalize_stage(stage):
-    """Normalize fund stage variants."""
-    if not stage or stage == "Unknown":
+def compute_quality_grade(entry):
+    """Compute completeness score and letter grade."""
+    score = 0
+    if entry.get("n"):                                      score += 10
+    if entry.get("e"):                                      score += 20
+    if entry.get("c"):                                      score += 10
+    if entry.get("t"):                                      score += 10
+    if entry.get("li"):                                     score += 10
+    if entry.get("rg"):                                     score += 10
+    if entry.get("it") and entry["it"] != "Other":          score += 10
+    if entry.get("fs") and entry["fs"] != "Unknown":        score += 5
+    if entry.get("sc") and entry["sc"] != ["Generalist"]:   score += 5
+    if entry.get("cs"):                                     score += 5
+    if entry.get("rs") and entry["rs"] != "None":           score += 5
+    if score >= 80:   return "A"
+    elif score >= 60: return "B"
+    elif score >= 40: return "C"
+    elif score >= 20: return "D"
+    else:             return "F"
+
+
+def compute_staleness(status, last_contact_str, email_count, rs):
+    """Compute staleness from last contact date."""
+    if not last_contact_str or last_contact_str == "None":
+        if status in ("Active", "Warm"):
+            return "at-risk"
+        return "unknown"
+
+    # Parse last contact date
+    lc_date = None
+    for fmt in ["%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%b %d, %Y", "%B %d, %Y"]:
+        try:
+            lc_date = datetime.strptime(last_contact_str[:10], fmt[:min(len(fmt), 10)])
+            break
+        except (ValueError, IndexError):
+            continue
+    if not lc_date:
+        # Try partial dates like "Sun, 01 Ma"
+        try:
+            lc_date = datetime.strptime(last_contact_str[:10], "%Y-%m-%d")
+        except (ValueError, IndexError):
+            if status in ("Active", "Warm"):
+                return "at-risk"
+            return "unknown"
+
+    days_since = (TODAY - lc_date).days
+
+    if status in ("Active", "Warm"):
+        if days_since > 90:
+            return "stale"
+        elif days_since > 30:
+            return "at-risk"
+        else:
+            return "healthy"
+    elif email_count >= 2:
+        if days_since > 180:
+            return "stale"
+        elif days_since > 90:
+            return "at-risk"
+        else:
+            return "healthy"
+    elif rs in ("Strong", "Medium"):
+        return "healthy"
+    return "unknown"
+
+
+def normalize_company_for_dedup(company):
+    if not company:
         return ""
-    s = stage.lower().strip()
-    mapping = {
-        "angel": "Angel",
-        "pre-seed": "Pre-Seed", "pre-seed/seed": "Pre-Seed", "preseed": "Pre-Seed",
-        "seed": "Seed", "seed/a": "Seed",
-        "series a": "Series A", "series a/b": "Series A",
-        "series b": "Series B+", "series b+": "Series B+",
-        "growth": "Growth",
-        "pe": "PE", "private equity": "PE",
-        "multi-stage": "Multi-Stage",
-    }
-    for key, val in mapping.items():
-        if key in s:
-            return val
-    return stage
+    c = company.lower().strip()
+    for suffix in [" inc", " inc.", " llc", " corp", " corp.", " co.", " ltd", " ltd.",
+                   " lp", " l.p.", " gp", " ventures", " capital", " partners",
+                   ", inc", ", llc", ", corp", " management", " advisors", " group"]:
+        c = c.replace(suffix, "")
+    c = re.sub(r'[.\-\'\"]', '', c)
+    c = re.sub(r'\s+', ' ', c).strip()
+    return c
 
 
-def normalize_status(status):
-    """Normalize contact status."""
-    if not status:
-        return ""
-    s = status.lower().strip()
-    if "active" in s:
-        return "Active"
-    if "warm" in s:
-        return "Warm"
-    if "contact" in s:
-        return "Contacted"
-    if "new" in s:
-        return "New"
-    if "connect" in s:
-        return "Connected"
-    return status
+def names_fuzzy_match(name1, name2, threshold=0.85):
+    if not name1 or not name2:
+        return False, 0.0
+    n1 = name1.lower().strip()
+    n2 = name2.lower().strip()
+    if n1 == n2:
+        return True, 1.0
+    ratio = SequenceMatcher(None, n1, n2).ratio()
+    if ratio >= threshold:
+        return True, ratio
+    # Check nickname variants
+    parts1 = n1.split()
+    parts2 = n2.split()
+    if len(parts1) >= 2 and len(parts2) >= 2 and parts1[-1] == parts2[-1]:
+        first1, first2 = parts1[0], parts2[0]
+        for full, nicks in NICKNAMES.items():
+            all_forms = [full] + nicks
+            if first1 in all_forms and first2 in all_forms:
+                return True, 0.90
+    return False, ratio
 
 
-# ─── Load all sources ───
-print("Loading data sources...")
+# ═══════════════════════════════════════════════════
+# LOAD PRIMARY SOURCE: Excel
+# ═══════════════════════════════════════════════════
+print("Loading Excel master file...")
 
-raw_records = []  # list of dicts with normalized fields + metadata
+# Map Excel sheet names to source identifiers
+SHEET_SOURCE_MAP = {
+    "🔥 Follow-Up Now": "follow-up",
+    "🏦 Investors & Funds": "investors",
+    "👼 Angels": "angels",
+    "✅ LinkedIn Verified": "linkedin-verified",
+    "💬 WhatsApp Contacts": "whatsapp",
+    "🇮🇱 Israel": "israel",
+    "🗽 NYC Investors": "nyc",
+    "🌴 South Florida": "south-florida",
+    "💼 LinkedIn Network": "linkedin",
+    "💰 LP Pipeline": "lp-pipeline",
+    "🎯 Re-Engage": "re-engage",
+    "🚀 Deal Flow": "dealflow",
+    "⚖️ Legal & Services": "legal",
+    "📋 Needs Review": "needs-review",
+}
 
+raw_records = []
 
-def add_records(source_name, data, field_map):
-    """Generic loader. field_map maps our fields to source fields."""
-    for row in data:
-        rec = {"_primary_source": source_name}
-        for our_field, src_field in field_map.items():
-            if callable(src_field):
-                rec[our_field] = src_field(row)
-            else:
-                rec[our_field] = (row.get(src_field) or "").strip() if isinstance(row.get(src_field), str) else row.get(src_field, "")
-        raw_records.append(rec)
+if os.path.exists(EXCEL_PATH):
+    wb = openpyxl.load_workbook(EXCEL_PATH, read_only=True, data_only=True)
+    for sheet_name, source_id in SHEET_SOURCE_MAP.items():
+        if sheet_name not in wb.sheetnames:
+            continue
+        ws = wb[sheet_name]
+        rows = list(ws.iter_rows(values_only=True))
+        if len(rows) < 2:
+            continue
+        headers = [str(h or "") for h in rows[0]]
+        col = {h: i for i, h in enumerate(headers)}
 
+        for row in rows[1:]:
+            def cell(h):
+                idx = col.get(h)
+                if idx is None or idx >= len(row):
+                    return ""
+                v = row[idx]
+                if v is None:
+                    return ""
+                return str(v).strip() if isinstance(v, str) else v
 
-# Investors
-add_records("investors", load_json("investors.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": "Region", "city": "City", "fundStage": "Fund Stage",
-    "sector": "Sector", "status": "Status", "priority": "Priority",
-    "linkedinUrl": "LinkedIn URL",
-    "_email_count": lambda r: int(r.get("Emails", 0) or 0),
-    "_last_contact": "Last Contact",
-})
+            name = clean_name(str(cell("Name") or ""))
+            email = str(cell("Email") or "").strip().lower()
+            if not name and not email:
+                continue
 
-# Angels
-add_records("angels", load_json("angels.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": "Region", "city": "City", "fundStage": "Fund Stage",
-    "sector": "Sector", "status": "Status", "priority": "Priority",
-    "linkedinUrl": "LinkedIn URL",
-    "_email_count": lambda r: int(r.get("Emails", 0) or 0),
-})
+            # Parse WA Groups (pipe-separated)
+            wa_raw = str(cell("WA Groups") or "")
+            wa_groups = [g.strip() for g in wa_raw.split("|") if g.strip() and g.strip() != "None"]
 
-# LinkedIn (from spreadsheet)
-add_records("linkedin", load_json("linkedin.json"), {
-    "name": "Name", "email": lambda r: (r.get("Inferred Email") or r.get("Placeholder Email") or "").strip(),
-    "company": "Company", "title": "Title", "region": "Region",
-    "linkedinUrl": "LinkedIn URL",
-})
+            # Parse tags
+            tags_raw = str(cell("Tags") or "")
+            tags = [t.strip() for t in tags_raw.split() if t.strip() and t.strip() != "None"]
 
-# LinkedIn Connections
-add_records("linkedin-conn", load_json("linkedin-connections.json"), {
-    "name": "fullName", "email": "email", "company": "company", "title": "position",
-    "linkedinUrl": "url", "_category": "category",
-})
+            # Email count
+            ec_raw = cell("Emails")
+            try:
+                email_count = int(ec_raw) if ec_raw and str(ec_raw) != "None" else 0
+            except (ValueError, TypeError):
+                email_count = 0
 
-# HubSpot
-add_records("hubspot", load_json("hubspot-contacts.json"), {
-    "name": "fullName", "email": "email",
-    "_email_count": lambda r: 1 if r.get("email") else 0,
-    "_owner": "owner",
-    "_last_contact": "createDate",
-    "_in_crm": lambda r: r.get("inCRM", False),
-})
+            # Last contact
+            lc_raw = cell("Last Contact")
+            lc_str = ""
+            if lc_raw and str(lc_raw) != "None":
+                if hasattr(lc_raw, "strftime"):
+                    lc_str = lc_raw.strftime("%Y-%m-%d")
+                else:
+                    lc_str = str(lc_raw)[:10]
 
-# External Lists
-add_records("external", load_json("external-lists.json"), {
-    "name": "name", "email": "email", "company": "firm",
-    "_category": "category", "_focus": "focus",
-    "_description": "description", "_check_size_raw": "checkSize",
-    "_rounds": "rounds", "region": "region", "linkedinUrl": "linkedin",
-    "_headquarters": lambda r: r.get("headquarters", ""),
-})
+            # Follow-up
+            fu_raw = cell("Follow-Up")
+            fu_str = ""
+            if fu_raw and str(fu_raw) != "None":
+                if hasattr(fu_raw, "strftime"):
+                    fu_str = fu_raw.strftime("%Y-%m-%d")
+                else:
+                    fu_str = str(fu_raw)[:10]
 
-# WhatsApp
-add_records("whatsapp", load_json("whatsapp-contacts.json"), {
-    "name": "name", "company": "company",
-    "linkedinUrl": lambda r: r.get("linkedinUrl", ""),
-    "_wa_messages": lambda r: r.get("messages", 0),
-    "_wa_groups": lambda r: r.get("groups", []),
-    "_focus": lambda r: r.get("focus", ""),
-    "_check_size_raw": lambda r: r.get("checkSize", ""),
-    "_in_crm": lambda r: r.get("inCRM", False),
-})
+            # Priority
+            pr_raw = str(cell("Priority") or "")
+            priority = pr_raw if pr_raw in ("High", "Medium", "Low") else ""
 
-# Deal Flow
-add_records("dealflow", load_json("dealflow.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": "Region", "status": "Status", "linkedinUrl": "LinkedIn URL",
-})
+            # LinkedIn verified
+            li_verified = str(cell("LI ✓") or "")
+            lv = "verified" if li_verified == "✓" else ("unverified" if li_verified == "~" else "")
 
-# Follow-up
-add_records("follow-up", load_json("follow-up.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": "Region", "city": "City", "fundStage": "Fund Stage",
-    "sector": "Sector", "status": "Status", "priority": "Priority",
-    "linkedinUrl": "LinkedIn URL",
-    "_email_count": lambda r: int(r.get("Emails", 0) or 0),
-    "_last_contact": "Last Contact",
-})
+            # Israel flag
+            il_raw = str(cell("Israel") or "")
+            israel = bool(il_raw and il_raw != "None")
 
-# Legal
-add_records("legal", load_json("legal.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": "Region", "linkedinUrl": "LinkedIn URL",
-})
+            # Category from Excel (much richer than our inference)
+            category = str(cell("Category") or "")
+            if category == "None":
+                category = ""
 
-# NYC
-add_records("nyc", load_json("nyc-investors.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": lambda r: "NYC Metro", "city": "City", "fundStage": "Fund Stage",
-    "sector": "Sector", "status": "Status", "priority": "Priority",
-    "linkedinUrl": "LinkedIn URL",
-    "_email_count": lambda r: int(r.get("Emails", 0) or 0),
-})
+            # Status
+            status = str(cell("Status") or "")
+            if status == "None":
+                status = ""
 
-# South Florida
-add_records("south-florida", load_json("south-florida.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": lambda r: "South Florida", "city": "City", "fundStage": "Fund Stage",
-    "sector": "Sector", "status": "Status", "priority": "Priority",
-    "linkedinUrl": "LinkedIn URL",
-})
+            # Geo
+            geo = str(cell("Geo") or "")
+            if geo == "None":
+                geo = ""
 
-# Re-engage
-add_records("re-engage", load_json("re-engage.json"), {
-    "name": "Name", "email": "Email", "company": "Company", "title": "Title",
-    "region": "Region", "fundStage": "Fund Stage", "sector": "Sector",
-    "status": "Status", "linkedinUrl": "LinkedIn URL",
-})
+            # Fund Stage
+            fund_stage = str(cell("Fund Stage") or "")
+            if fund_stage in ("None", "Unknown"):
+                fund_stage = ""
 
-# Needs Review
-add_records("needs-review", load_json("needs-review.json"), {
-    "name": "Name", "email": "Email", "company": "Company",
-    "region": "Region", "_category": "Category",
-})
+            # Sector
+            sector_raw = str(cell("Sector") or "")
+            if sector_raw in ("None", "Unknown"):
+                sector_raw = ""
 
-print(f"Loaded {len(raw_records)} raw records from all sources")
+            # Notes
+            notes = str(cell("Notes") or "")
+            if notes == "None":
+                notes = ""
 
-# ─── Dedup Pass 1: By email ───
+            # Source string
+            source_str = str(cell("Source") or "")
+            if source_str == "None":
+                source_str = ""
+
+            # HS Status
+            hs_status = str(cell("HS Status") or "")
+            if hs_status == "None":
+                hs_status = ""
+
+            rec = {
+                "_source": "excel",
+                "_sheet": source_id,
+                "name": name,
+                "email": email if "@" in email else "",
+                "company": str(cell("Company") or "").strip(),
+                "title": str(cell("Title") or "").strip() if str(cell("Title") or "") != "None" else "",
+                "category": category,
+                "status": status,
+                "last_contact": lc_str,
+                "email_count": email_count,
+                "follow_up": fu_str,
+                "priority": priority,
+                "linkedin": str(cell("LinkedIn") or "").strip() if str(cell("LinkedIn") or "") != "None" else "",
+                "li_verified": lv,
+                "wa_groups": wa_groups,
+                "fund_stage": fund_stage,
+                "sector_raw": sector_raw,
+                "geo": geo,
+                "israel": israel,
+                "hs_status": hs_status,
+                "tags": tags,
+                "notes": notes,
+                "source_str": source_str,
+            }
+            raw_records.append(rec)
+
+    wb.close()
+    print(f"  Loaded {len(raw_records)} rows from Excel ({len(SHEET_SOURCE_MAP)} sheets)")
+else:
+    print("  Excel file not found, falling back to JSON sources only")
+
+# ═══════════════════════════════════════════════════
+# DEDUP: By email first, then name+company
+# ═══════════════════════════════════════════════════
 print("Deduplicating...")
+
+# Sheet priority: determines which sheet's data wins during merge
+SHEET_PRIORITY = [
+    "follow-up", "investors", "nyc", "south-florida", "israel", "lp-pipeline",
+    "angels", "whatsapp", "linkedin-verified", "linkedin", "re-engage",
+    "dealflow", "legal", "needs-review"
+]
+
 email_groups = defaultdict(list)
 no_email = []
 
 for rec in raw_records:
-    email = (rec.get("email") or "").strip().lower()
-    name = clean_name(rec.get("name", ""))
-    if not name and not email:
-        continue  # skip completely empty records
+    email = rec.get("email", "")
     if email and "@" in email:
         email_groups[email].append(rec)
     else:
-        rec["name"] = name
         no_email.append(rec)
 
-# Source priority for merging
-SOURCE_PRIORITY = [
-    "investors", "nyc", "south-florida", "external", "dealflow", "angels",
-    "follow-up", "re-engage", "linkedin", "linkedin-conn", "hubspot",
-    "whatsapp", "legal", "needs-review"
-]
+
+def sheet_priority_key(rec):
+    sheet = rec.get("_sheet", "")
+    return SHEET_PRIORITY.index(sheet) if sheet in SHEET_PRIORITY else 99
 
 
-def merge_records(records):
-    """Merge multiple records into one unified record."""
-    # Sort by source priority
-    def source_key(r):
-        src = r.get("_primary_source", "")
-        return SOURCE_PRIORITY.index(src) if src in SOURCE_PRIORITY else 99
-    records.sort(key=source_key)
-
+def merge_excel_records(records):
+    """Merge multiple Excel records for the same person."""
+    records.sort(key=sheet_priority_key)
     merged = {}
-    sources = set()
-    email_count = 0
-    wa_messages = 0
-    wa_groups = []
-    in_crm = False
-    sector_hints = []
+    all_sheets = set()
+    all_tags = set()
+    max_email_count = 0
+    all_wa_groups = set()
+    all_notes = []
 
     for rec in records:
-        sources.add(rec["_primary_source"])
-        email_count = max(email_count, rec.get("_email_count", 0))
-        wa_messages = max(wa_messages, rec.get("_wa_messages", 0))
-        wa_groups = rec.get("_wa_groups", []) or wa_groups
-        in_crm = in_crm or rec.get("_in_crm", False)
-        if rec.get("sector"):
-            sector_hints.append(rec["sector"])
+        all_sheets.add(rec["_sheet"])
+        all_tags.update(rec.get("tags", []))
+        max_email_count = max(max_email_count, rec.get("email_count", 0))
+        all_wa_groups.update(rec.get("wa_groups", []))
+        if rec.get("notes"):
+            all_notes.append(rec["notes"])
 
-        # Take first non-empty value for each field
-        for field in ["name", "email", "company", "title", "region", "city",
-                       "fundStage", "sector", "status", "priority", "linkedinUrl",
-                       "_category", "_focus", "_description", "_check_size_raw",
-                       "_rounds", "_owner", "_last_contact", "_headquarters"]:
+        # Take first non-empty value for scalar fields
+        for field in ["name", "email", "company", "title", "category", "status",
+                       "last_contact", "follow_up", "priority", "linkedin",
+                       "li_verified", "fund_stage", "sector_raw", "geo",
+                       "israel", "hs_status", "source_str"]:
             val = rec.get(field, "")
-            if isinstance(val, str):
-                val = val.strip()
             if val and val != "Unknown" and field not in merged:
                 merged[field] = val
-            elif val and val != "Unknown" and not merged.get(field):
-                merged[field] = val
 
-    merged["sources"] = sorted(sources)
-    merged["_email_count"] = email_count
-    merged["_wa_messages"] = wa_messages
-    merged["_wa_groups"] = wa_groups
-    merged["_in_crm"] = in_crm
-    merged["_sector_hints"] = sector_hints
+    merged["_sheets"] = sorted(all_sheets)
+    merged["tags"] = sorted(all_tags)
+    merged["email_count"] = max_email_count
+    merged["wa_groups"] = sorted(all_wa_groups)
+    merged["notes"] = " | ".join(all_notes[:3]) if all_notes else ""
     return merged
 
 
 # Merge email groups
 unified = []
 for email, recs in email_groups.items():
-    merged = merge_records(recs)
-    merged["name"] = clean_name(merged.get("name", ""))
-    merged["email"] = email
-    unified.append(merged)
+    m = merge_excel_records(recs)
+    m["email"] = email
+    m["name"] = clean_name(m.get("name", ""))
+    unified.append(m)
 
-# ─── Dedup Pass 2: No-email records by name+company ───
+# Dedup no-email records by name+company
 name_groups = defaultdict(list)
 for rec in no_email:
     name = clean_name(rec.get("name", "")).lower()
@@ -541,80 +529,246 @@ for rec in no_email:
         name_groups[key].append(rec)
 
 for key, recs in name_groups.items():
-    merged = merge_records(recs)
-    merged["name"] = clean_name(merged.get("name", ""))
-    # Check if this name+company already exists in unified (from email pass)
-    name_lower = merged["name"].lower()
-    company_lower = (merged.get("company") or "").lower()
+    m = merge_excel_records(recs)
+    m["name"] = clean_name(m.get("name", ""))
+    # Check if already in unified (from email pass)
+    name_lower = m["name"].lower()
+    company_lower = (m.get("company") or "").lower()
     duplicate = False
     for u in unified:
-        if u["name"].lower() == name_lower and (u.get("company") or "").lower() == company_lower:
+        if u.get("name", "").lower() == name_lower and (u.get("company") or "").lower() == company_lower:
             # Merge into existing
-            for field in ["title", "region", "city", "fundStage", "sector", "status",
-                          "priority", "linkedinUrl", "_category", "_focus"]:
-                if not u.get(field) and merged.get(field):
-                    u[field] = merged[field]
-            u["sources"] = sorted(set(u["sources"]) | set(merged["sources"]))
-            u["_email_count"] = max(u.get("_email_count", 0), merged.get("_email_count", 0))
-            u["_wa_messages"] = max(u.get("_wa_messages", 0), merged.get("_wa_messages", 0))
-            if merged.get("_wa_groups"):
-                u["_wa_groups"] = merged["_wa_groups"]
+            for field in ["title", "geo", "fund_stage", "sector_raw", "status",
+                          "priority", "linkedin", "category", "last_contact", "source_str"]:
+                if not u.get(field) and m.get(field):
+                    u[field] = m[field]
+            u["_sheets"] = sorted(set(u.get("_sheets", [])) | set(m.get("_sheets", [])))
+            u["tags"] = sorted(set(u.get("tags", [])) | set(m.get("tags", [])))
+            u["email_count"] = max(u.get("email_count", 0), m.get("email_count", 0))
+            u["wa_groups"] = sorted(set(u.get("wa_groups", [])) | set(m.get("wa_groups", [])))
             duplicate = True
             break
     if not duplicate:
-        unified.append(merged)
+        unified.append(m)
 
-print(f"After dedup: {len(unified)} unique records")
+print(f"  After dedup: {len(unified)} unique records")
 
-# ─── Enrich all records ───
-print("Enriching tags...")
+# ═══════════════════════════════════════════════════
+# ENRICH: Build final index entries
+# ═══════════════════════════════════════════════════
+print("Enriching records...")
+
+# Map sheet names to display-friendly source labels
+SHEET_TO_SOURCE = {
+    "follow-up": "follow-up", "investors": "investors", "nyc": "nyc",
+    "south-florida": "south-florida", "israel": "israel", "lp-pipeline": "lp-pipeline",
+    "angels": "angels", "whatsapp": "whatsapp", "linkedin-verified": "linkedin-verified",
+    "linkedin": "linkedin", "re-engage": "re-engage", "dealflow": "dealflow",
+    "legal": "legal", "needs-review": "needs-review",
+}
+
 final = []
 for rec in unified:
     name = rec.get("name", "")
     if not name:
         continue
 
-    # Generate stable ID
+    # Stable ID
     id_seed = rec.get("email") or f"{name}|{rec.get('company', '')}"
     rid = hashlib.md5(id_seed.lower().encode()).hexdigest()[:12]
 
+    # Build source list from sheets
+    sheets = rec.get("_sheets", [])
+    src = sorted(set(SHEET_TO_SOURCE.get(s, s) for s in sheets))
+    # Also parse source_str for additional sources
+    source_str = rec.get("source_str", "")
+    if source_str:
+        if "hubspot" in source_str.lower() or "HubSpot" in source_str:
+            src = sorted(set(src) | {"hubspot"})
+        if "gmail" in source_str.lower():
+            src = sorted(set(src) | {"gmail"})
+        if "calendar" in source_str.lower():
+            src = sorted(set(src) | {"calendar"})
+        if "linkedin" in source_str.lower() and "linkedin" not in src and "linkedin-verified" not in src:
+            src = sorted(set(src) | {"linkedin"})
+
+    # Category (use Excel's rich categories)
+    category = rec.get("category", "Other") or "Other"
+
+    # Fund stage - normalize
+    fund_stage = rec.get("fund_stage", "")
+    # Check if fund stage contains a dollar range
+    check_size = ""
+    if fund_stage and "$" in fund_stage:
+        check_size = parse_check_size(fund_stage)
+        fund_stage = ""  # dollar ranges go to check_size, not fund_stage
+    elif fund_stage:
+        # Normalize stage names
+        fs_lower = fund_stage.lower()
+        if "angel" in fs_lower: fund_stage = "Angel"
+        elif "pre-seed" in fs_lower and "seed" in fs_lower and "series" not in fs_lower: fund_stage = "Pre-Seed/Seed"
+        elif "pre-seed" in fs_lower and "series a" in fs_lower: fund_stage = "Pre-Seed - Series A"
+        elif "pre-seed" in fs_lower: fund_stage = "Pre-Seed"
+        elif "seed" in fs_lower and "series b" in fs_lower: fund_stage = "Seed - Series B+"
+        elif "seed/a" in fs_lower or ("seed" in fs_lower and "series a" in fs_lower): fund_stage = "Seed/A"
+        elif "seed" in fs_lower: fund_stage = "Seed"
+        elif "series a/b" in fs_lower or "series a" in fs_lower: fund_stage = "Series A/B"
+        elif "series b" in fs_lower: fund_stage = "Series B+"
+        elif "multi" in fs_lower: fund_stage = "Multi-Stage"
+        elif "growth" in fs_lower: fund_stage = "Growth"
+        elif "pe" in fs_lower or "private equity" in fs_lower: fund_stage = "PE"
+        elif "debt" in fs_lower or "credit" in fs_lower: fund_stage = "Debt/Credit"
+
+    # Sector normalization
+    sector_raw = rec.get("sector_raw", "")
+    sector = normalize_sector(sector_raw)
+    sectors = [sector] if sector != "Generalist" else []
+    # Also check tags for sector hints
+    tags = rec.get("tags", [])
+    tag_sector_map = {
+        "ai": "AI/ML", "deep-tech": "Deep Tech", "applied-ai-group": "Applied AI",
+        "defense": "Defense/Gov", "defense-tech-group": "Defense Tech",
+        "fintech": "Fintech", "crypto": "Crypto/Web3", "saas": "B2B SaaS",
+        "consumer": "Consumer", "climate": "Climate", "healthcare": "Healthcare",
+        "infra": "B2B SaaS",
+    }
+    for tag in tags:
+        if tag in tag_sector_map and tag_sector_map[tag] not in sectors:
+            sectors.append(tag_sector_map[tag])
+    if not sectors:
+        sectors = ["Generalist"]
+
+    # Region
+    geo = rec.get("geo", "")
+    if not geo:
+        # Try to infer from tags
+        for tag in tags:
+            if tag == "nyc": geo = "NYC Metro"; break
+            elif tag == "bay-area": geo = "Bay Area"; break
+            elif tag == "boston": geo = "Boston"; break
+            elif tag == "la": geo = "LA / SoCal"; break
+            elif tag == "south-florida": geo = "South Florida"; break
+            elif tag == "israel": geo = "Israel"; break
+
+    # Relationship strength
+    email_count = rec.get("email_count", 0)
+    wa_count = len(rec.get("wa_groups", []))
+    in_crm = len(src) >= 2 or "hubspot" in src or "investors" in src
+    rs = compute_strength(email_count, wa_count, len(src), in_crm)
+
+    # Status normalization
+    status = rec.get("status", "")
+    if status not in ("Active", "Warm", "Contacted", "New"):
+        if status:
+            s = status.lower()
+            if "active" in s: status = "Active"
+            elif "warm" in s: status = "Warm"
+            elif "contact" in s: status = "Contacted"
+            elif "new" in s: status = "New"
+            else: status = ""
+        else:
+            status = ""
+
+    # CRM status
+    crm = "In CRM" if in_crm else "New"
+
+    # LinkedIn URL
+    li = rec.get("linkedin", "")
+    if li and not li.startswith("http"):
+        li = ""
+
     entry = {
         "id": rid,
-        "n": name,                                          # name
-        "e": rec.get("email", ""),                          # email
-        "c": rec.get("company", ""),                        # company
-        "t": rec.get("title", ""),                          # title
-        "li": rec.get("linkedinUrl", ""),                   # linkedin
-        "src": rec.get("sources", []),                      # sources
-        "st": normalize_status(rec.get("status", "")),      # status
-        "rg": infer_region(rec),                            # region
-        "ct": rec.get("city", ""),                          # city
-        "fs": normalize_stage(rec.get("fundStage", "")),    # fund stage
-        "sc": infer_sectors(rec),                           # sectors (array)
-        "pr": rec.get("priority", ""),                      # priority
-        "crm": "In CRM" if rec.get("_in_crm") or len(rec.get("sources", [])) > 1 else "New",
-        "it": infer_investor_type(rec),                     # investor type
-        "rt": infer_role_type(rec.get("title", "")),        # role type
-        "cs": parse_check_size(rec.get("_check_size_raw", "")),  # check size range
-        "rs": "",                                           # relationship strength (computed below)
-        "wg": rec.get("_wa_groups", []),                    # whatsapp groups
+        "n": name,
+        "e": rec.get("email", ""),
+        "c": rec.get("company", ""),
+        "t": rec.get("title", ""),
+        "li": li,
+        "lv": rec.get("li_verified", ""),
+        "src": src,
+        "so": rec.get("source_str", ""),
+        "st": status,
+        "rg": geo,
+        "fs": fund_stage,
+        "sc": sectors,
+        "pr": rec.get("priority", ""),
+        "crm": crm,
+        "it": category,
+        "rt": infer_role_type(rec.get("title", "")),
+        "cs": check_size,
+        "rs": rs,
+        "wg": rec.get("wa_groups", []),
+        "tg": tags,
+        "ec": email_count,
+        "lc": rec.get("last_contact", ""),
+        "fu": rec.get("follow_up", ""),
+        "nt": rec.get("notes", ""),
+        "il": rec.get("israel", False),
     }
 
-    # Compute relationship strength
-    entry["rs"] = compute_strength({
-        "_email_count": rec.get("_email_count", 0),
-        "_wa_messages": rec.get("_wa_messages", 0),
-        "sources": entry["src"],
-        "_in_crm": entry["crm"] == "In CRM",
-    })
+    # Compute quality grade
+    entry["q"] = compute_quality_grade(entry)
+
+    # Compute staleness
+    entry["sl"] = compute_staleness(status, rec.get("last_contact", ""), email_count, rs)
 
     final.append(entry)
 
-print(f"Enriched {len(final)} records")
+print(f"  Enriched {len(final)} records")
 
-# ─── Compute facets ───
+# ═══════════════════════════════════════════════════
+# FUZZY DEDUP: Find candidates (don't auto-merge)
+# ═══════════════════════════════════════════════════
+print("Finding fuzzy duplicate candidates...")
+
+company_groups = defaultdict(list)
+for i, rec in enumerate(final):
+    nc = normalize_company_for_dedup(rec["c"])
+    if nc and len(nc) >= 2:
+        company_groups[nc].append(i)
+
+dedup_candidates = []
+seen_pairs = set()
+
+for company_key, indices in company_groups.items():
+    if len(indices) < 2 or len(indices) > 50:  # skip very large groups
+        continue
+    for i in range(len(indices)):
+        for j in range(i + 1, len(indices)):
+            r1 = final[indices[i]]
+            r2 = final[indices[j]]
+            if r1["id"] == r2["id"]:
+                continue
+            # Skip if same email (already deduped)
+            if r1["e"] and r1["e"] == r2["e"]:
+                continue
+            pair_key = tuple(sorted([r1["id"], r2["id"]]))
+            if pair_key in seen_pairs:
+                continue
+
+            match, similarity = names_fuzzy_match(r1["n"], r2["n"])
+            if match:
+                seen_pairs.add(pair_key)
+                dedup_candidates.append({
+                    "id1": r1["id"], "name1": r1["n"], "email1": r1["e"],
+                    "company1": r1["c"], "title1": r1["t"], "sources1": r1["src"],
+                    "grade1": r1["q"],
+                    "id2": r2["id"], "name2": r2["n"], "email2": r2["e"],
+                    "company2": r2["c"], "title2": r2["t"], "sources2": r2["src"],
+                    "grade2": r2["q"],
+                    "similarity": round(similarity, 2),
+                })
+
+# Sort by similarity desc
+dedup_candidates.sort(key=lambda x: -x["similarity"])
+print(f"  Found {len(dedup_candidates)} fuzzy duplicate candidates")
+
+# ═══════════════════════════════════════════════════
+# COMPUTE FACETS
+# ═══════════════════════════════════════════════════
 print("Computing facets...")
 facets = {}
+
 facet_dims = {
     "investorType": "it",
     "region": "rg",
@@ -624,46 +778,110 @@ facet_dims = {
     "relationshipStrength": "rs",
     "roleType": "rt",
     "checkSize": "cs",
+    "qualityGrade": "q",
+    "staleness": "sl",
 }
 
 for facet_name, field in facet_dims.items():
-    counts = Counter(r[field] for r in final if r[field])
+    counts = Counter(r[field] for r in final if r[field] and r[field] != "unknown")
     facets[facet_name] = dict(counts.most_common(30))
 
-# Sectors are arrays, need special handling
+# Sectors (arrays)
 sector_counter = Counter()
 for r in final:
     for s in r["sc"]:
-        if s != "Generalist":
-            sector_counter[s] += 1
-sector_counter["Generalist"] = sum(1 for r in final if r["sc"] == ["Generalist"])
-facets["sector"] = dict(sector_counter.most_common(20))
+        sector_counter[s] += 1
+facets["sector"] = dict(sector_counter.most_common(25))
 
-# Sources
+# Sources (arrays)
 source_counter = Counter()
 for r in final:
     for s in r["src"]:
         source_counter[s] += 1
-facets["sources"] = dict(source_counter.most_common(20))
+facets["sources"] = dict(source_counter.most_common(25))
 
-# ─── Write output ───
+# Tags (arrays) — top 30
+tag_counter = Counter()
+for r in final:
+    for t in r["tg"]:
+        tag_counter[t] += 1
+facets["tags"] = dict(tag_counter.most_common(40))
+
+# Data quality summary
+grade_dist = Counter(r["q"] for r in final)
+total = len(final)
+quality_summary = {
+    "gradeDistribution": {g: grade_dist.get(g, 0) for g in ["A", "B", "C", "D", "F"]},
+    "overallScore": round(sum(1 for r in final if r["q"] in ("A", "B")) / total * 100, 1) if total else 0,
+    "topGaps": sorted([
+        {"field": "Email", "missing": sum(1 for r in final if not r["e"]), "pct": round(sum(1 for r in final if not r["e"]) / total * 100, 1)},
+        {"field": "Region", "missing": sum(1 for r in final if not r["rg"]), "pct": round(sum(1 for r in final if not r["rg"]) / total * 100, 1)},
+        {"field": "Fund Stage", "missing": sum(1 for r in final if not r["fs"]), "pct": round(sum(1 for r in final if not r["fs"]) / total * 100, 1)},
+        {"field": "Title", "missing": sum(1 for r in final if not r["t"]), "pct": round(sum(1 for r in final if not r["t"]) / total * 100, 1)},
+        {"field": "LinkedIn", "missing": sum(1 for r in final if not r["li"]), "pct": round(sum(1 for r in final if not r["li"]) / total * 100, 1)},
+        {"field": "Company", "missing": sum(1 for r in final if not r["c"]), "pct": round(sum(1 for r in final if not r["c"]) / total * 100, 1)},
+        {"field": "Sector", "missing": sum(1 for r in final if r["sc"] == ["Generalist"]), "pct": round(sum(1 for r in final if r["sc"] == ["Generalist"]) / total * 100, 1)},
+    ], key=lambda x: -x["pct"]),
+}
+
+# Staleness summary
+staleness_summary = {
+    "stale": sum(1 for r in final if r["sl"] == "stale"),
+    "atRisk": sum(1 for r in final if r["sl"] == "at-risk"),
+    "healthy": sum(1 for r in final if r["sl"] == "healthy"),
+    "unknown": sum(1 for r in final if r["sl"] == "unknown"),
+}
+
+# ═══════════════════════════════════════════════════
+# WRITE OUTPUT
+# ═══════════════════════════════════════════════════
+print("Writing output files...")
+
 index_path = os.path.join(DATA_DIR, "search-index.json")
 meta_path = os.path.join(DATA_DIR, "search-meta.json")
+dedup_path = os.path.join(DATA_DIR, "dedup-candidates.json")
 
-output = {"records": final, "facets": facets}
+# Strip empty strings and false booleans to save space
+def compact(entry):
+    return {k: v for k, v in entry.items() if v or v == 0 or k == "id"}
+
+compact_records = [compact(r) for r in final]
+
 with open(index_path, "w", encoding="utf-8") as f:
-    json.dump(output, f, separators=(",", ":"))
+    json.dump({"records": compact_records, "facets": facets}, f, separators=(",", ":"))
 
 with open(meta_path, "w", encoding="utf-8") as f:
-    json.dump({"total": len(final), "facets": facets}, f, indent=2)
+    json.dump({
+        "total": len(final),
+        "facets": facets,
+        "dataQuality": quality_summary,
+        "staleness": staleness_summary,
+        "dedupCandidates": len(dedup_candidates),
+    }, f, indent=2)
 
-# File size
+with open(dedup_path, "w", encoding="utf-8") as f:
+    json.dump(dedup_candidates, f, indent=2)
+
+# ═══════════════════════════════════════════════════
+# SUMMARY
+# ═══════════════════════════════════════════════════
 size_mb = os.path.getsize(index_path) / (1024 * 1024)
-print(f"\nOutput: {index_path} ({size_mb:.1f} MB, {len(final)} records)")
-print(f"Facets: {meta_path}")
-
-# Summary
-print("\n=== Enrichment Summary ===")
-for facet_name, counts in facets.items():
-    top = sorted(counts.items(), key=lambda x: -x[1])[:5]
-    print(f"  {facet_name}: {', '.join(f'{k} ({v})' for k, v in top)}")
+print(f"\n{'='*50}")
+print(f"Output: {index_path} ({size_mb:.1f} MB, {len(final)} records)")
+print(f"Dedup candidates: {len(dedup_candidates)}")
+print(f"\n=== Quality Grades ===")
+for g in ["A", "B", "C", "D", "F"]:
+    print(f"  {g}: {grade_dist.get(g, 0):,}")
+print(f"  Overall score: {quality_summary['overallScore']}% (A+B)")
+print(f"\n=== Staleness ===")
+for k, v in staleness_summary.items():
+    print(f"  {k}: {v:,}")
+print(f"\n=== Top Categories ===")
+for k, v in Counter(r["it"] for r in final).most_common(10):
+    print(f"  {k}: {v:,}")
+print(f"\n=== Top Regions ===")
+for k, v in Counter(r["rg"] for r in final if r["rg"]).most_common(10):
+    print(f"  {k}: {v:,}")
+print(f"\n=== Top Tags ===")
+for k, v in tag_counter.most_common(15):
+    print(f"  {k}: {v:,}")

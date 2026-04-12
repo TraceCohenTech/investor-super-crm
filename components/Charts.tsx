@@ -103,6 +103,28 @@ export function FundStageChart({ data }: { data: { name: string; count: number }
   );
 }
 
+const GRADE_COLORS_CHART = ["#22c55e", "#3b82f6", "#f59e0b", "#f97316", "#ef4444"];
+
+export function DataQualityChart({ data }: { data: { name: string; value: number }[] }) {
+  return (
+    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5">
+      <h3 className="text-sm font-semibold text-white mb-4">Contact Quality Grades</h3>
+      <ResponsiveContainer width="100%" height={320}>
+        <BarChart data={data} margin={{ left: 0, right: 20 }}>
+          <XAxis dataKey="name" tick={{ fill: "#e4e4e7", fontSize: 13 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} />
+          <Tooltip {...tooltipStyle} />
+          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+            {data.map((_, i) => (
+              <Cell key={i} fill={GRADE_COLORS_CHART[i % GRADE_COLORS_CHART.length]} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function MostActiveChart({ data }: { data: { name: string; company: string; count: number }[] }) {
   return (
     <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5">
