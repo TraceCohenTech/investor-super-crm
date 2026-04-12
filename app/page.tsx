@@ -1,6 +1,7 @@
 import StatCard from "@/components/StatCard";
 import { TopFirmsChart, RegionChart, FundStageChart, StatusPieChart } from "@/components/Charts";
 import summary from "@/data/summary.json";
+import liSummary from "@/data/linkedin-summary.json";
 
 export default function DashboardPage() {
   const statusData = [
@@ -14,7 +15,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white">NYVP Investor CRM</h1>
-        <p className="text-sm text-[#a1a1aa] mt-1">Updated April 11, 2026</p>
+        <p className="text-sm text-[#a1a1aa] mt-1">Updated April 12, 2026</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -26,6 +27,7 @@ export default function DashboardPage() {
         <StatCard label="Bay Area" value={summary.bayArea} icon="🌉" />
         <StatCard label="South Florida" value={summary.southFlorida} icon="🌴" />
         <StatCard label="Boston" value={summary.boston} icon="🎓" />
+        <StatCard label="LinkedIn Connections" value={liSummary.total} icon="🔗" sub={`${liSummary.newToCRM.toLocaleString()} new to CRM`} />
         <StatCard label="Active (5+ emails)" value={summary.active} icon="✅" sub="Regular correspondents" />
         <StatCard label="Warm (3-4 emails)" value={summary.warm} icon="🌡️" sub="Growing relationships" />
         <StatCard label="Follow-Up Overdue" value={summary.followUpOverdue} icon="🔥" sub="Need attention" />

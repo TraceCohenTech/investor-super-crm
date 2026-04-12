@@ -31,12 +31,32 @@
   },
   {
     "name": "GPs Anonymous (VC MPs only)",
-    "members": 69,
-    "messages": 2084
+    "members": 67,
+    "messages": 2083
   },
   {
     "name": "Six Point Ventures",
     "members": 4,
     "messages": 34708
+  },
+  {
+    "name": "361Firm VC Group",
+    "members": 110,
+    "messages": 607
+  },
+  {
+    "name": "Applied AI VCs",
+    "members": 188,
+    "messages": 167
+  },
+  {
+    "name": "Defense Tech VC",
+    "members": 96,
+    "messages": 71
+  },
+  {
+    "name": "Deep Tech VCs",
+    "members": 192,
+    "messages": 204
   }
 ]

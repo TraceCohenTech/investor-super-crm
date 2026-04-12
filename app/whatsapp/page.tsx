@@ -16,6 +16,10 @@ function GroupBadge({ name }: { name: string }) {
     "First Check for Israeli Founders": "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
     "Jewish VCs - Politics": "bg-sky-500/10 text-sky-400 border-sky-500/20",
     "Six Point Ventures": "bg-teal-500/10 text-teal-400 border-teal-500/20",
+    "361Firm VC Group": "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    "Applied AI VCs": "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20",
+    "Deep Tech VCs": "bg-lime-500/10 text-lime-400 border-lime-500/20",
+    "Defense Tech VC": "bg-red-500/10 text-red-400 border-red-500/20",
   };
   const short: Record<string, string> = {
     "The Pre-Seed Regulars": "Pre-Seed",
@@ -26,6 +30,10 @@ function GroupBadge({ name }: { name: string }) {
     "First Check for Israeli Founders": "Israeli",
     "Jewish VCs - Politics": "Jewish VCs",
     "Six Point Ventures": "SPV",
+    "361Firm VC Group": "361Firm",
+    "Applied AI VCs": "Applied AI",
+    "Deep Tech VCs": "Deep Tech",
+    "Defense Tech VC": "Defense",
   };
   return (
     <span className={`inline-flex px-1.5 py-0.5 text-[10px] font-medium rounded border whitespace-nowrap ${colors[name] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
@@ -95,7 +103,7 @@ export default function WhatsAppPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white">💬 WhatsApp Network</h1>
-        <p className="text-sm text-[#a1a1aa] mt-1">Contacts extracted from 8 WhatsApp investor groups</p>
+        <p className="text-sm text-[#a1a1aa] mt-1">Contacts extracted from 12 WhatsApp investor groups</p>
       </div>
 
       {/* Stats */}

@@ -13,6 +13,7 @@ const nav = [
   { href: "/legal", label: "Legal & Services", icon: "⚖️" },
   { href: "/nyc", label: "NYC Investors", icon: "🗽" },
   { href: "/south-florida", label: "South Florida", icon: "🌴" },
+  { href: "/connections", label: "LinkedIn Connections", icon: "🔗" },
   { href: "/whatsapp", label: "WhatsApp Network", icon: "💬" },
   { href: "/re-engage", label: "Re-Engage", icon: "🎯" },
   { href: "/needs-review", label: "Needs Review", icon: "📋" },
