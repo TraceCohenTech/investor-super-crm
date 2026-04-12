@@ -1,0 +1,149 @@
+{
+  "totalContacts": 24425,
+  "investorsAndFunds": 10012,
+  "angelsAndIndividuals": 2957,
+  "nycBased": 1200,
+  "linkedInOnly": 2919,
+  "active": 1161,
+  "warm": 888,
+  "followUpDueToday": 1132,
+  "topFirms": [
+    {
+      "name": "Meridian Capital",
+      "count": 82
+    },
+    {
+      "name": "Human Ventures",
+      "count": 41
+    },
+    {
+      "name": "4 Points Capital",
+      "count": 36
+    },
+    {
+      "name": "Insight Partners",
+      "count": 31
+    },
+    {
+      "name": "Bessemer Venture Partners",
+      "count": 30
+    },
+    {
+      "name": "Andreessen Horowitz",
+      "count": 30
+    },
+    {
+      "name": "Techstars",
+      "count": 25
+    },
+    {
+      "name": "Greycroft Partners",
+      "count": 23
+    },
+    {
+      "name": "FF Venture Capital",
+      "count": 21
+    },
+    {
+      "name": "RRE Ventures",
+      "count": 21
+    },
+    {
+      "name": "FirstMark Capital",
+      "count": 21
+    },
+    {
+      "name": "SA Angels",
+      "count": 21
+    },
+    {
+      "name": "Lightspeed Venture Partners",
+      "count": 20
+    },
+    {
+      "name": "Tiferes Ventures",
+      "count": 20
+    },
+    {
+      "name": "AngelList",
+      "count": 20
+    }
+  ],
+  "mostActiveContacts": [
+    {
+      "name": "Gunther, Andrew",
+      "company": "Cooley",
+      "count": 181
+    },
+    {
+      "name": "Jonah Lecker",
+      "company": "Aladvisors",
+      "count": 178
+    },
+    {
+      "name": "Mejza, Caolinn Y",
+      "company": "Cooley",
+      "count": 157
+    },
+    {
+      "name": "Event Organizer",
+      "company": "Gust",
+      "count": 141
+    },
+    {
+      "name": "Brian Cohen",
+      "company": "Six Point Ventures",
+      "count": 138
+    },
+    {
+      "name": "Sahej Suri",
+      "company": "Blue Dot Investors",
+      "count": 117
+    },
+    {
+      "name": "Rabin, Jaclyn Lisa",
+      "company": "Cooley",
+      "count": 117
+    },
+    {
+      "name": "sixpoint@nakama.solutions",
+      "company": "Nakama",
+      "count": 108
+    },
+    {
+      "name": "Mike Maccombie",
+      "company": "FF Venture Capital",
+      "count": 106
+    },
+    {
+      "name": "Winter Mead",
+      "company": "Coolwater Capital",
+      "count": 105
+    },
+    {
+      "name": "Michael Eisenberg",
+      "company": "Aleph VC",
+      "count": 98
+    },
+    {
+      "name": "Michael Grigoriev",
+      "company": "Relay Capital",
+      "count": 92
+    },
+    {
+      "name": "Fraser Spivey",
+      "company": "Idol Apps",
+      "count": 91
+    },
+    {
+      "name": "brian cohen",
+      "company": "Newyorkangels",
+      "count": 90
+    },
+    {
+      "name": "Aaron Vermut",
+      "company": "Blue Dot Investors",
+      "count": 89
+    }
+  ]
+}
