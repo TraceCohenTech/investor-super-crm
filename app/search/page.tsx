@@ -394,8 +394,11 @@ function SearchPage() {
     });
   }, [filtered, sortKey, sortDir]);
 
-  const totalPages = Math.ceil(sorted.length / pageSize);
-  const paged = sorted.slice(page * pageSize, (page + 1) * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const safePage = Math.min(page, totalPages - 1);
+  const paged = sorted.slice(safePage * pageSize, (safePage + 1) * pageSize);
+  const rangeStart = sorted.length === 0 ? 0 : safePage * pageSize + 1;
+  const rangeEnd = Math.min(sorted.length, (safePage + 1) * pageSize);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -583,23 +586,63 @@ function SearchPage() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setPage(Math.max(0, page - 1))}
-            disabled={page === 0}
-            className="px-3 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white disabled:opacity-30 transition-colors"
-          >
-            Previous
-          </button>
-          <span className="text-xs text-[#a1a1aa]">Page {page + 1} of {totalPages}</span>
-          <button
-            onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-            disabled={page >= totalPages - 1}
-            className="px-3 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white disabled:opacity-30 transition-colors"
-          >
-            Next
-          </button>
+      {sorted.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs text-[#a1a1aa]">
+            Showing <span className="text-white font-medium">{rangeStart.toLocaleString()}</span>–
+            <span className="text-white font-medium">{rangeEnd.toLocaleString()}</span> of{" "}
+            <span className="text-white font-medium">{sorted.length.toLocaleString()}</span>
+          </span>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setPage(0)}
+              disabled={safePage === 0}
+              aria-label="First page"
+              className="px-2.5 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              «
+            </button>
+            <button
+              onClick={() => setPage(Math.max(0, safePage - 1))}
+              disabled={safePage === 0}
+              className="px-3 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              ‹ Prev
+            </button>
+
+            <div className="flex items-center gap-1 px-2">
+              <span className="text-xs text-[#a1a1aa]">Page</span>
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                value={safePage + 1}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (!isNaN(n)) setPage(Math.min(totalPages - 1, Math.max(0, n - 1)));
+                }}
+                className="w-14 bg-[#09090b] border border-[#27272a] rounded px-2 py-1 text-xs text-white text-center focus:outline-none focus:border-[#3b82f6] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="text-xs text-[#a1a1aa]">of {totalPages.toLocaleString()}</span>
+            </div>
+
+            <button
+              onClick={() => setPage(Math.min(totalPages - 1, safePage + 1))}
+              disabled={safePage >= totalPages - 1}
+              className="px-3 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              Next ›
+            </button>
+            <button
+              onClick={() => setPage(totalPages - 1)}
+              disabled={safePage >= totalPages - 1}
+              aria-label="Last page"
+              className="px-2.5 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              »
+            </button>
+          </div>
         </div>
       )}
     </div>
