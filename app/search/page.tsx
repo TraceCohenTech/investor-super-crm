@@ -188,6 +188,7 @@ function SearchPage() {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveName, setSaveName] = useState("");
+  const [pageInput, setPageInput] = useState("1");
   const pageSize = 50;
 
   const searchParams = useSearchParams();
@@ -395,10 +396,13 @@ function SearchPage() {
   }, [filtered, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
-  const safePage = Math.min(page, totalPages - 1);
+  const safePage = Math.min(Math.max(0, page), totalPages - 1);
   const paged = sorted.slice(safePage * pageSize, (safePage + 1) * pageSize);
   const rangeStart = sorted.length === 0 ? 0 : safePage * pageSize + 1;
   const rangeEnd = Math.min(sorted.length, (safePage + 1) * pageSize);
+  const goToPage = (n: number) => setPage(Math.min(totalPages - 1, Math.max(0, n - 1)));
+
+  useEffect(() => { setPageInput(String(safePage + 1)); }, [safePage]);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -596,6 +600,7 @@ function SearchPage() {
 
           <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={() => setPage(0)}
               disabled={safePage === 0}
               aria-label="First page"
@@ -604,37 +609,40 @@ function SearchPage() {
               «
             </button>
             <button
-              onClick={() => setPage(Math.max(0, safePage - 1))}
+              type="button"
+              onClick={() => setPage(safePage - 1)}
               disabled={safePage === 0}
               className="px-3 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               ‹ Prev
             </button>
 
-            <div className="flex items-center gap-1 px-2">
+            <form
+              onSubmit={(e) => { e.preventDefault(); const n = parseInt(pageInput, 10); if (!isNaN(n)) goToPage(n); }}
+              className="flex items-center gap-1 px-2"
+            >
               <span className="text-xs text-[#a1a1aa]">Page</span>
               <input
-                type="number"
-                min={1}
-                max={totalPages}
-                value={safePage + 1}
-                onChange={(e) => {
-                  const n = parseInt(e.target.value, 10);
-                  if (!isNaN(n)) setPage(Math.min(totalPages - 1, Math.max(0, n - 1)));
-                }}
-                className="w-14 bg-[#09090b] border border-[#27272a] rounded px-2 py-1 text-xs text-white text-center focus:outline-none focus:border-[#3b82f6] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                type="text"
+                inputMode="numeric"
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value.replace(/[^0-9]/g, ""))}
+                onBlur={() => { const n = parseInt(pageInput, 10); if (!isNaN(n)) goToPage(n); else setPageInput(String(safePage + 1)); }}
+                className="w-14 bg-[#09090b] border border-[#27272a] rounded px-2 py-1 text-xs text-white text-center focus:outline-none focus:border-[#3b82f6] transition-colors"
               />
               <span className="text-xs text-[#a1a1aa]">of {totalPages.toLocaleString()}</span>
-            </div>
+            </form>
 
             <button
-              onClick={() => setPage(Math.min(totalPages - 1, safePage + 1))}
+              type="button"
+              onClick={() => setPage(safePage + 1)}
               disabled={safePage >= totalPages - 1}
               className="px-3 py-1.5 text-xs rounded-lg bg-[#18181b] border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               Next ›
             </button>
             <button
+              type="button"
               onClick={() => setPage(totalPages - 1)}
               disabled={safePage >= totalPages - 1}
               aria-label="Last page"
