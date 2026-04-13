@@ -24,11 +24,15 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-.table-container { overflow-x: auto; }
-.table-container table { width: 100%; border-collapse: collapse; }
+.table-container { overflow-x: hidden; }
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
 .table-container th {
   text-align: left;
-  padding: 12px 16px;
+  padding: 12px 12px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -41,9 +45,12 @@ body {
   z-index: 1;
 }
 .table-container td {
-  padding: 10px 16px;
+  padding: 10px 12px;
   font-size: 14px;
   border-bottom: 1px solid var(--border);
   color: #e4e4e7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
 }
 .table-container tr:hover td { background: rgba(59, 130, 246, 0.04); }
