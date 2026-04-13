@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 const STORAGE_KEY = "nyvp-crm-auth";
-const PASSWORD = "Trace";
+const PASSWORD = process.env.NEXT_PUBLIC_CRM_PASSWORD ?? "Trace";
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [authed, setAuthed] = useState(false);
@@ -63,7 +63,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="text-center mt-6">
-            <div className="flex items-center justify-center gap-3 text-xs text-[#52525b]">
+            <div className="flex items-center justify-center gap-3 text-xs text-[#71717a]">
               <a href="https://x.com/Trace_Cohen" target="_blank" rel="noopener noreferrer" className="hover:text-[#a1a1aa] transition-colors">
                 Twitter
               </a>

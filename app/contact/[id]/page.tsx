@@ -15,7 +15,7 @@ import {
 
 function Badge({ className, children }: { className: string; children: React.ReactNode }) {
   return (
-    <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border ${className}`}>
+    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${className}`}>
       {children}
     </span>
   );
@@ -113,7 +113,7 @@ export default function ContactDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-sm text-[#52525b]">Loading contact...</div>
+        <div className="text-sm text-[#71717a]">Loading contact...</div>
       </div>
     );
   }
@@ -124,7 +124,7 @@ export default function ContactDetailPage() {
         <Link href="/search" className="text-sm text-[#3b82f6] hover:underline">
           &larr; Back to Search
         </Link>
-        <div className="text-center py-20 text-[#52525b]">Contact not found</div>
+        <div className="text-center py-20 text-[#71717a]">Contact not found</div>
       </div>
     );
   }
@@ -179,7 +179,7 @@ export default function ContactDetailPage() {
             <a href={contact.li} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
               LinkedIn
               {contact.lv === "verified" && <span className="text-emerald-400">✓</span>}
-              {contact.lv === "unverified" && <span className="text-[#52525b]">~</span>}
+              {contact.lv === "unverified" && <span className="text-[#71717a]">~</span>}
             </a>
           )}
           {contact.il && <span className="text-[#a1a1aa]">🇮🇱 Israel</span>}
@@ -190,19 +190,19 @@ export default function ContactDetailPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-center">
           <div className="text-lg font-bold text-white">{contact.ec || 0}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Emails</div>
+          <div className="text-xs text-[#a1a1aa]">Emails</div>
         </div>
         <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-center">
           <div className="text-lg font-bold text-white">{contact.st || "—"}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Status</div>
+          <div className="text-xs text-[#a1a1aa]">Status</div>
         </div>
         <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-center">
           <div className="text-lg font-bold text-white">{contact.lc || "—"}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Last Contact</div>
+          <div className="text-xs text-[#a1a1aa]">Last Contact</div>
         </div>
         <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-center">
           <div className="text-lg font-bold text-white">{contact.fu || "—"}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Follow-Up</div>
+          <div className="text-xs text-[#a1a1aa]">Follow-Up</div>
         </div>
       </div>
 
@@ -211,42 +211,42 @@ export default function ContactDetailPage() {
         <Section title="Classification">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-[#52525b]">Category</span>
+              <span className="text-[#71717a]">Category</span>
               <span className="text-white">{contact.it || "—"}</span>
             </div>
             {contact.rt && (
               <div className="flex justify-between">
-                <span className="text-[#52525b]">Role</span>
+                <span className="text-[#71717a]">Role</span>
                 <span className="text-white">{contact.rt}</span>
               </div>
             )}
             {contact.fs && (
               <div className="flex justify-between">
-                <span className="text-[#52525b]">Stage</span>
+                <span className="text-[#71717a]">Stage</span>
                 <span className="text-white">{contact.fs}</span>
               </div>
             )}
             {contact.cs && (
               <div className="flex justify-between">
-                <span className="text-[#52525b]">Check Size</span>
+                <span className="text-[#71717a]">Check Size</span>
                 <span className="text-white">{contact.cs}</span>
               </div>
             )}
             {contact.rg && (
               <div className="flex justify-between">
-                <span className="text-[#52525b]">Region</span>
+                <span className="text-[#71717a]">Region</span>
                 <span className="text-white">{contact.rg}</span>
               </div>
             )}
             {contact.pr && (
               <div className="flex justify-between">
-                <span className="text-[#52525b]">Priority</span>
+                <span className="text-[#71717a]">Priority</span>
                 <span className="text-white">{contact.pr}</span>
               </div>
             )}
             {contact.crm && (
               <div className="flex justify-between">
-                <span className="text-[#52525b]">CRM</span>
+                <span className="text-[#71717a]">CRM</span>
                 <span className="text-white">{contact.crm}</span>
               </div>
             )}
@@ -271,7 +271,7 @@ export default function ContactDetailPage() {
             {tags.map((tag) => (
               <span
                 key={tag}
-                className={`px-2 py-0.5 text-[10px] rounded-full ${TAG_COLORS[tag] || "bg-zinc-500/10 text-zinc-400"}`}
+                className={`px-2 py-0.5 text-xs rounded-full ${TAG_COLORS[tag] || "bg-zinc-500/10 text-zinc-400"}`}
               >
                 {tag}
               </span>
@@ -294,7 +294,7 @@ export default function ContactDetailPage() {
           ))}
         </div>
         {contact.so && (
-          <p className="text-[10px] text-[#52525b] mt-3 break-all">{contact.so}</p>
+          <p className="text-xs text-[#71717a] mt-3 break-all">{contact.so}</p>
         )}
       </Section>
 
@@ -322,7 +322,7 @@ export default function ContactDetailPage() {
       <div id="intros">
         <Section title={`Intro Paths (${introPaths.length})`}>
           {introPaths.length === 0 ? (
-            <p className="text-xs text-[#52525b]">No warm intro paths found for this contact.</p>
+            <p className="text-xs text-[#71717a]">No warm intro paths found for this contact.</p>
           ) : (
             <div className="space-y-2">
               {introPaths.map((path, i) => (
@@ -337,9 +337,9 @@ export default function ContactDetailPage() {
                     >
                       {path.mutual.n}
                     </Link>
-                    <span className="text-xs text-[#52525b] ml-2">{path.mutual.c}</span>
+                    <span className="text-xs text-[#71717a] ml-2">{path.mutual.c}</span>
                   </div>
-                  <span className="text-[10px] text-[#52525b] shrink-0">{path.via}</span>
+                  <span className="text-xs text-[#71717a] shrink-0">{path.via}</span>
                 </div>
               ))}
             </div>
@@ -359,7 +359,7 @@ export default function ContactDetailPage() {
                 >
                   {s.n}
                 </Link>
-                <span className="text-xs text-[#52525b]">{s.t}</span>
+                <span className="text-xs text-[#71717a]">{s.t}</span>
                 {s.rs && (
                   <Badge className={STRENGTH_COLORS[s.rs] || ""}>{s.rs}</Badge>
                 )}

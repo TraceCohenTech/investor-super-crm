@@ -14,7 +14,7 @@ function OwnerBadge({ owner }: { owner: string }) {
     "Rina Zariqi": "bg-rose-500/10 text-rose-400 border-rose-500/20",
   };
   return (
-    <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${colors[owner] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
+    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${colors[owner] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
       {owner || "—"}
     </span>
   );
@@ -120,7 +120,7 @@ export default function HubSpotPage() {
 
       {/* Owner filter */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-xs text-[#52525b] py-1.5">Owner:</span>
+        <span className="text-xs text-[#71717a] py-1.5">Owner:</span>
         <button
           onClick={() => { setOwnerFilter("all"); setPage(0); }}
           className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
@@ -152,7 +152,7 @@ export default function HubSpotPage() {
               onClick={() => { setSearch(d.name); setPage(0); }}
               className="px-2.5 py-1 text-xs rounded-lg bg-[#27272a] text-[#a1a1aa] hover:text-white hover:bg-[#3f3f46] transition-colors"
             >
-              {d.name} <span className="text-[#52525b]">({d.count})</span>
+              {d.name} <span className="text-[#71717a]">({d.count})</span>
             </button>
           ))}
         </div>
@@ -203,11 +203,11 @@ export default function HubSpotPage() {
           <tbody>
             {paged.map((c, i) => (
               <tr key={i}>
-                <td className="font-medium text-white whitespace-nowrap">{c.fullName || <span className="text-[#52525b] italic">No name</span>}</td>
+                <td className="font-medium text-white whitespace-nowrap">{c.fullName || <span className="text-[#71717a] italic">No name</span>}</td>
                 <td>
                   {c.email
                     ? <a href={`mailto:${c.email}`} className="text-cyan-400 hover:text-cyan-300 text-xs truncate max-w-[220px] block">{c.email}</a>
-                    : <span className="text-[#52525b] text-xs">—</span>
+                    : <span className="text-[#71717a] text-xs">—</span>
                   }
                 </td>
                 <td className="text-xs text-[#a1a1aa]">{c.domain || "—"}</td>
@@ -215,11 +215,11 @@ export default function HubSpotPage() {
                 <td><OwnerBadge owner={c.owner} /></td>
                 <td>
                   {c.inCRM
-                    ? <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>
-                    : <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>
+                    ? <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>
+                    : <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>
                   }
                 </td>
-                <td className="text-xs text-[#52525b] whitespace-nowrap">{c.createDate ? c.createDate.split(" ")[0] : "—"}</td>
+                <td className="text-xs text-[#71717a] whitespace-nowrap">{c.createDate ? c.createDate.split(" ")[0] : "—"}</td>
               </tr>
             ))}
           </tbody>

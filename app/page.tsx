@@ -71,7 +71,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={grade}
-                  className={`${GRADE_BAR_COLORS[grade] || "bg-zinc-400"} flex items-center justify-center text-[10px] font-bold text-black`}
+                  className={`${GRADE_BAR_COLORS[grade] || "bg-zinc-400"} flex items-center justify-center text-xs font-bold text-black`}
                   style={{ width: `${pct}%` }}
                   title={`Grade ${grade}: ${count.toLocaleString()} (${pct.toFixed(1)}%)`}
                 >
@@ -82,7 +82,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Top Gaps */}
-          <h4 className="text-[10px] text-[#52525b] uppercase tracking-wider mb-2">Top Data Gaps</h4>
+          <h4 className="text-xs text-[#a1a1aa] uppercase tracking-wider mb-2">Top Data Gaps</h4>
           <div className="space-y-1.5">
             {dq.topGaps.filter(g => g.pct > 5).map((gap) => (
               <div key={gap.field} className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export default function DashboardPage() {
                     style={{ width: `${gap.pct}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-[#52525b] w-16 text-right">{gap.pct}% empty</span>
+                <span className="text-xs text-[#a1a1aa] w-16 text-right">{gap.pct}% empty</span>
               </div>
             ))}
           </div>
@@ -105,18 +105,18 @@ export default function DashboardPage() {
           <div className="grid grid-cols-3 gap-4 mb-5">
             <div className="text-center">
               <div className="text-2xl font-bold text-red-400">{stale.stale.toLocaleString()}</div>
-              <div className="text-[10px] text-[#a1a1aa] mt-1">Going Cold</div>
-              <div className="text-[9px] text-[#52525b]">90+ days</div>
+              <div className="text-xs text-[#d4d4d8] mt-1">Going Cold</div>
+              <div className="text-xs text-[#a1a1aa]">90+ days</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-amber-400">{stale.atRisk.toLocaleString()}</div>
-              <div className="text-[10px] text-[#a1a1aa] mt-1">At Risk</div>
-              <div className="text-[9px] text-[#52525b]">30-90 days</div>
+              <div className="text-xs text-[#d4d4d8] mt-1">At Risk</div>
+              <div className="text-xs text-[#a1a1aa]">30-90 days</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-emerald-400">{stale.healthy.toLocaleString()}</div>
-              <div className="text-[10px] text-[#a1a1aa] mt-1">Healthy</div>
-              <div className="text-[9px] text-[#52525b]">&lt;30 days</div>
+              <div className="text-xs text-[#d4d4d8] mt-1">Healthy</div>
+              <div className="text-xs text-[#a1a1aa]">&lt;30 days</div>
             </div>
           </div>
           <div className="space-y-2">

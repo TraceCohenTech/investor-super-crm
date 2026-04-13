@@ -58,7 +58,7 @@ function SourceDots({ sources }: { sources: string[] }) {
   return (
     <div className="flex gap-1 flex-wrap">
       {sources.map((s) => (
-        <span key={s} className="px-1.5 py-0.5 text-[9px] rounded bg-[#27272a] text-[#a1a1aa]">
+        <span key={s} className="px-1.5 py-0.5 text-xs rounded bg-[#27272a] text-[#a1a1aa]">
           {s}
         </span>
       ))}
@@ -76,7 +76,7 @@ function FieldRow({ label, val1, val2, selected, onSelect }: {
   if (!val1 && !val2) return null;
   return (
     <div className="grid grid-cols-[80px_1fr_1fr] gap-2 items-center text-xs">
-      <span className="text-[#52525b] text-right">{label}</span>
+      <span className="text-[#71717a] text-right">{label}</span>
       <button
         onClick={() => onSelect("left")}
         className={`px-2 py-1 rounded text-left transition-colors ${
@@ -236,7 +236,7 @@ export default function DedupPage() {
               <span className="text-emerald-400 text-sm font-medium">
                 {merges.length} merge{merges.length === 1 ? "" : "s"} recorded
               </span>
-              <span className="text-[10px] text-[#52525b]">
+              <span className="text-xs text-[#71717a]">
                 ({dismissed.size} dismissed)
               </span>
             </div>
@@ -258,9 +258,9 @@ export default function DedupPage() {
           <div className="flex flex-wrap gap-2">
             {merges.slice(-5).map((m, i) => (
               <div key={i} className="flex items-center gap-1.5 bg-[#18181b] rounded-lg px-2.5 py-1 border border-[#27272a]">
-                <span className="text-[10px] text-emerald-400">Keep {m.keep.slice(0, 6)}</span>
-                <span className="text-[10px] text-[#52525b]">← {m.remove.slice(0, 6)}</span>
-                <button onClick={() => undoMerge(merges.length - 5 + i)} className="text-[10px] text-[#52525b] hover:text-red-400 ml-1">✕</button>
+                <span className="text-xs text-emerald-400">Keep {m.keep.slice(0, 6)}</span>
+                <span className="text-xs text-[#71717a]">← {m.remove.slice(0, 6)}</span>
+                <button onClick={() => undoMerge(merges.length - 5 + i)} className="text-xs text-[#71717a] hover:text-red-400 ml-1">✕</button>
               </div>
             ))}
           </div>
@@ -279,7 +279,7 @@ export default function DedupPage() {
           className="bg-[#18181b] border border-[#27272a] rounded-lg px-4 py-2 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:border-[#3b82f6] flex-1 max-w-md transition-colors"
         />
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#52525b]">Min similarity:</span>
+          <span className="text-xs text-[#71717a]">Min similarity:</span>
           {[0.85, 0.9, 0.95].map((v) => (
             <button
               key={v}
@@ -307,18 +307,18 @@ export default function DedupPage() {
         <div className="bg-[#18181b] border-2 border-[#3b82f6]/40 rounded-xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">Merge Wizard</h3>
-            <span className="text-[10px] text-[#52525b]">Click each field to pick the value to keep</span>
+            <span className="text-xs text-[#71717a]">Click each field to pick the value to keep</span>
           </div>
 
           {/* Headers */}
-          <div className="grid grid-cols-[80px_1fr_1fr] gap-2 text-[10px] text-[#52525b]">
+          <div className="grid grid-cols-[80px_1fr_1fr] gap-2 text-xs text-[#71717a]">
             <span></span>
             <div className="flex items-center gap-2">
-              <span className={`px-1.5 py-0.5 rounded-full border text-[9px] font-bold ${GRADE_COLORS[mergeTarget.grade1] || ""}`}>{mergeTarget.grade1}</span>
+              <span className={`px-1.5 py-0.5 rounded-full border text-xs font-bold ${GRADE_COLORS[mergeTarget.grade1] || ""}`}>{mergeTarget.grade1}</span>
               <span className="text-[#a1a1aa]">{mergeTarget.name1}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`px-1.5 py-0.5 rounded-full border text-[9px] font-bold ${GRADE_COLORS[mergeTarget.grade2] || ""}`}>{mergeTarget.grade2}</span>
+              <span className={`px-1.5 py-0.5 rounded-full border text-xs font-bold ${GRADE_COLORS[mergeTarget.grade2] || ""}`}>{mergeTarget.grade2}</span>
               <span className="text-[#a1a1aa]">{mergeTarget.name2}</span>
             </div>
           </div>
@@ -329,11 +329,11 @@ export default function DedupPage() {
           <FieldRow label="Title" val1={mergeTarget.title1} val2={mergeTarget.title2} selected={fieldSelections["title"] || null} onSelect={(s) => setFieldSelections(p => ({ ...p, title: s }))} />
 
           <div className="grid grid-cols-[80px_1fr_1fr] gap-2 items-start text-xs">
-            <span className="text-[#52525b] text-right pt-1">Sources</span>
+            <span className="text-[#71717a] text-right pt-1">Sources</span>
             <SourceDots sources={mergeTarget.sources1} />
             <SourceDots sources={mergeTarget.sources2} />
           </div>
-          <div className="text-[10px] text-[#52525b] ml-[88px]">Sources from both contacts will be combined.</div>
+          <div className="text-xs text-[#71717a] ml-[88px]">Sources from both contacts will be combined.</div>
 
           <div className="flex items-center gap-3 pt-2">
             <button
@@ -370,8 +370,8 @@ export default function DedupPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <SimilarityBadge value={c.similarity} />
-                {isMerged && <span className="text-[10px] text-emerald-400">Merged</span>}
-                {isDismissed && <span className="text-[10px] text-[#52525b]">Dismissed</span>}
+                {isMerged && <span className="text-xs text-emerald-400">Merged</span>}
+                {isDismissed && <span className="text-xs text-[#71717a]">Dismissed</span>}
                 {!isMerged && !isDismissed && (
                   <div className="ml-auto flex items-center gap-2">
                     <button
@@ -400,7 +400,7 @@ export default function DedupPage() {
                       {c.name1}
                     </Link>
                     <span
-                      className={`inline-flex px-1.5 py-0.5 text-[9px] font-medium rounded-full border ${
+                      className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full border ${
                         GRADE_COLORS[c.grade1] || ""
                       }`}
                     >
@@ -412,7 +412,7 @@ export default function DedupPage() {
                   )}
                   <div className="text-xs text-[#a1a1aa]">{c.company1}</div>
                   {c.title1 && (
-                    <div className="text-[10px] text-[#52525b]">{c.title1}</div>
+                    <div className="text-xs text-[#71717a]">{c.title1}</div>
                   )}
                   <SourceDots sources={c.sources1} />
                 </div>
@@ -426,7 +426,7 @@ export default function DedupPage() {
                       {c.name2}
                     </Link>
                     <span
-                      className={`inline-flex px-1.5 py-0.5 text-[9px] font-medium rounded-full border ${
+                      className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full border ${
                         GRADE_COLORS[c.grade2] || ""
                       }`}
                     >
@@ -438,7 +438,7 @@ export default function DedupPage() {
                   )}
                   <div className="text-xs text-[#a1a1aa]">{c.company2}</div>
                   {c.title2 && (
-                    <div className="text-[10px] text-[#52525b]">{c.title2}</div>
+                    <div className="text-xs text-[#71717a]">{c.title2}</div>
                   )}
                   <SourceDots sources={c.sources2} />
                 </div>
@@ -448,7 +448,7 @@ export default function DedupPage() {
         })}
 
         {paged.length === 0 && (
-          <div className="text-center py-12 text-[#52525b] text-sm">
+          <div className="text-center py-12 text-[#71717a] text-sm">
             {merges.length > 0 || dismissed.size > 0
               ? "All pairs reviewed! Click \"Show all\" to see resolved pairs."
               : "No duplicate candidates match your filters."}

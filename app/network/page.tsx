@@ -236,7 +236,7 @@ export default function NetworkPage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Connection mode */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-[#52525b]">Connect by:</span>
+          <span className="text-xs text-[#71717a]">Connect by:</span>
           {(["company", "whatsapp", "source", "tags"] as FilterMode[]).map(m => (
             <button
               key={m}
@@ -290,7 +290,7 @@ export default function NetworkPage() {
 
         {/* Max nodes */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-[#52525b]">Max nodes:</span>
+          <span className="text-xs text-[#71717a]">Max nodes:</span>
           {[100, 200, 500].map(n => (
             <button
               key={n}
@@ -312,7 +312,7 @@ export default function NetworkPage() {
         <span>{graphData.nodes.length} nodes</span>
         <span>{graphData.links.length} connections</span>
         {filteredRecords.length !== data?.records.length && (
-          <span className="text-[#52525b]">(from {filteredRecords.length.toLocaleString()} filtered contacts)</span>
+          <span className="text-[#71717a]">(from {filteredRecords.length.toLocaleString()} filtered contacts)</span>
         )}
       </div>
 
@@ -321,7 +321,7 @@ export default function NetworkPage() {
         {Object.entries(TYPE_COLORS).slice(0, 8).map(([type, color]) => (
           <div key={type} className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-            <span className="text-[10px] text-[#a1a1aa]">{type}</span>
+            <span className="text-xs text-[#a1a1aa]">{type}</span>
           </div>
         ))}
       </div>
@@ -334,9 +334,9 @@ export default function NetworkPage() {
             <div className="text-xs text-[#a1a1aa]">{hoveredNode.company || "—"}</div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 text-[10px] rounded-full bg-[#27272a] text-[#a1a1aa]">{hoveredNode.type}</span>
-            <span className="px-2 py-0.5 text-[10px] rounded-full bg-[#27272a] text-[#a1a1aa]">Grade {hoveredNode.grade}</span>
-            {hoveredNode.region && <span className="px-2 py-0.5 text-[10px] rounded-full bg-[#27272a] text-[#a1a1aa]">{hoveredNode.region}</span>}
+            <span className="px-2 py-0.5 text-xs rounded-full bg-[#27272a] text-[#a1a1aa]">{hoveredNode.type}</span>
+            <span className="px-2 py-0.5 text-xs rounded-full bg-[#27272a] text-[#a1a1aa]">Grade {hoveredNode.grade}</span>
+            {hoveredNode.region && <span className="px-2 py-0.5 text-xs rounded-full bg-[#27272a] text-[#a1a1aa]">{hoveredNode.region}</span>}
           </div>
           <Link href={`/contact/${hoveredNode.id}`} className="text-xs text-[#3b82f6] hover:text-blue-300 ml-auto">
             View Profile →
@@ -386,11 +386,11 @@ export default function NetworkPage() {
             height={typeof window !== "undefined" ? window.innerHeight * 0.6 : 500}
           />
         ) : graphData.nodes.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-[#52525b] text-sm">
+          <div className="flex items-center justify-center h-full text-[#71717a] text-sm">
             No connections found. Try adjusting your filters or connection mode.
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-[#52525b] text-sm">
+          <div className="flex items-center justify-center h-full text-[#71717a] text-sm">
             Loading graph renderer...
           </div>
         )}

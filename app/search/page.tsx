@@ -64,13 +64,13 @@ const DOT_COLORS: { [key: string]: string } = {
 
 function GradeBadge({ grade }: { grade: string }) {
   if (!grade) return null;
-  return <span className={`inline-flex px-1.5 py-0.5 text-[9px] font-bold rounded-full border ${GRADE_COLORS[grade] || ""}`}>{grade}</span>;
+  return <span className={`inline-flex px-1.5 py-0.5 text-xs font-bold rounded-full border ${GRADE_COLORS[grade] || ""}`}>{grade}</span>;
 }
 
 function StalenessBadge({ level }: { level: string }) {
   const cfg = STALENESS_CONFIG[level];
   if (!cfg) return null;
-  return <span className={`inline-flex px-1.5 py-0.5 text-[9px] font-medium rounded-full border ${cfg.color}`}>{cfg.label}</span>;
+  return <span className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full border ${cfg.color}`}>{cfg.label}</span>;
 }
 
 function TypeBadge({ type }: { type: string }) {
@@ -87,12 +87,12 @@ function TypeBadge({ type }: { type: string }) {
     "University": "bg-sky-500/10 text-sky-400 border-sky-500/20",
   };
   if (!type) return null;
-  return <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${colors[type] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>{type}</span>;
+  return <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${colors[type] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>{type}</span>;
 }
 
 function StrengthBadge({ strength }: { strength: string }) {
-  if (!strength || strength === "None") return <span className="text-[#52525b] text-[10px]">-</span>;
-  return <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${STRENGTH_COLORS[strength] || ""}`}>{strength}</span>;
+  if (!strength || strength === "None") return <span className="text-[#71717a] text-xs">-</span>;
+  return <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${STRENGTH_COLORS[strength] || ""}`}>{strength}</span>;
 }
 
 function SourceDots({ sources }: { sources: string[] }) {
@@ -121,7 +121,7 @@ function FacetRow({ label, facetKey, counts, selected, onToggle, maxItems = 20 }
 
   return (
     <div className="flex items-start gap-2">
-      <span className="text-[10px] text-[#52525b] w-16 shrink-0 pt-1.5 text-right">{label}</span>
+      <span className="text-xs text-[#71717a] w-16 shrink-0 pt-1.5 text-right">{label}</span>
       <div className="flex flex-wrap gap-1.5">
         {visible.map(([value, count]) => {
           const active = selected.includes(value);
@@ -136,12 +136,12 @@ function FacetRow({ label, facetKey, counts, selected, onToggle, maxItems = 20 }
               }`}
             >
               {facetKey === "sources" ? (SRC_LABELS[value] || value) : value}
-              <span className={`ml-1 ${active ? "text-[#3b82f6]/60" : "text-[#52525b]"}`}>{count.toLocaleString()}</span>
+              <span className={`ml-1 ${active ? "text-[#3b82f6]/60" : "text-[#71717a]"}`}>{count.toLocaleString()}</span>
             </button>
           );
         })}
         {hasMore && (
-          <button onClick={() => setExpanded(!expanded)} className="px-2 py-1 text-[10px] text-[#52525b] hover:text-white transition-colors">
+          <button onClick={() => setExpanded(!expanded)} className="px-2 py-1 text-xs text-[#71717a] hover:text-white transition-colors">
             {expanded ? "Show less" : `+${items.length - maxItems} more`}
           </button>
         )}
@@ -409,7 +409,7 @@ function SearchPage() {
         <div className="text-center">
           <div className="text-2xl mb-3">🔍</div>
           <div className="text-sm text-[#a1a1aa]">Loading search index...</div>
-          <div className="text-xs text-[#52525b] mt-1">24,000+ contacts from master CRM</div>
+          <div className="text-xs text-[#71717a] mt-1">24,000+ contacts from master CRM</div>
         </div>
       </div>
     );
@@ -428,13 +428,13 @@ function SearchPage() {
       {/* Saved Searches */}
       {savedSearches.length > 0 && (
         <div className="flex gap-2 flex-wrap">
-          <span className="text-[10px] text-[#52525b] pt-1.5">Saved:</span>
+          <span className="text-xs text-[#71717a] pt-1.5">Saved:</span>
           {savedSearches.map((s, i) => (
             <div key={i} className="flex items-center gap-1 bg-[#18181b] border border-[#27272a] rounded-lg px-2.5 py-1">
               <button onClick={() => applySaved(s)} className="text-[11px] text-[#a1a1aa] hover:text-white transition-colors">
                 {s.name}
               </button>
-              <button onClick={() => deleteSaved(i)} className="text-[10px] text-[#52525b] hover:text-red-400 ml-1 transition-colors">
+              <button onClick={() => deleteSaved(i)} className="text-xs text-[#71717a] hover:text-red-400 ml-1 transition-colors">
                 ✕
               </button>
             </div>
@@ -471,7 +471,7 @@ function SearchPage() {
             className="w-full bg-[#18181b] border border-[#27272a] rounded-lg pl-4 pr-10 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:border-[#3b82f6] transition-colors"
           />
           {query && (
-            <button onClick={() => { setQuery(""); setPage(0); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#52525b] hover:text-white text-xs">
+            <button onClick={() => { setQuery(""); setPage(0); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#71717a] hover:text-white text-xs">
               ✕
             </button>
           )}
@@ -567,13 +567,13 @@ function SearchPage() {
                 <td className="flex items-center gap-2">
                   {r.e && <a href={`mailto:${r.e}`} className="text-cyan-400 hover:text-cyan-300 text-xs">Email</a>}
                   {r.li && <a href={r.li} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">LI</a>}
-                  <Link href={`/contact/${r.id}#intros`} className="text-emerald-400 hover:text-emerald-300 text-[10px]">Intro</Link>
+                  <Link href={`/contact/${r.id}#intros`} className="text-emerald-400 hover:text-emerald-300 text-xs">Intro</Link>
                 </td>
               </tr>
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-[#52525b]">
+                <td colSpan={9} className="text-center py-12 text-[#71717a]">
                   No results match your filters. Try broadening your search.
                 </td>
               </tr>

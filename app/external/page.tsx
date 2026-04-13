@@ -15,7 +15,7 @@ function CategoryBadge({ category }: { category: string }) {
     "Family Office": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   };
   return (
-    <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${colors[category] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
+    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${colors[category] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
       {category}
     </span>
   );
@@ -35,7 +35,7 @@ function SourceBadge({ source }: { source: string }) {
     "VCA 2025 LP Intel": "VCA 2025",
   };
   return (
-    <span className={`inline-flex px-1.5 py-0.5 text-[10px] font-medium rounded border whitespace-nowrap ${colors[source] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
+    <span className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded border whitespace-nowrap ${colors[source] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
       {short[source] || source}
     </span>
   );
@@ -146,7 +146,7 @@ export default function ExternalListsPage() {
 
       {/* Source filter row */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-xs text-[#52525b] py-1">Source:</span>
+        <span className="text-xs text-[#71717a] py-1">Source:</span>
         <button
           onClick={() => { setSourceFilter("all"); setPage(0); }}
           className={`px-3 py-1 text-xs rounded-lg border transition-colors ${
@@ -222,8 +222,8 @@ export default function ExternalListsPage() {
                 <td className="text-xs text-[#a1a1aa] whitespace-nowrap">{c.rounds || "—"}</td>
                 <td>
                   {c.inCRM
-                    ? <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>
-                    : <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>
+                    ? <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>
+                    : <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>
                   }
                 </td>
                 <td className="flex items-center gap-2">
@@ -233,7 +233,7 @@ export default function ExternalListsPage() {
                   {c.linkedin && (
                     <a href={c.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">LI</a>
                   )}
-                  {!c.email && !c.linkedin && <span className="text-[#52525b] text-xs">—</span>}
+                  {!c.email && !c.linkedin && <span className="text-[#71717a] text-xs">—</span>}
                 </td>
               </tr>
             ))}

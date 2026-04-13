@@ -14,7 +14,7 @@ function CategoryBadge({ category }: { category: string }) {
     "Other": "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
   };
   return (
-    <span className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border ${colors[category] || colors["Other"]}`}>
+    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${colors[category] || colors["Other"]}`}>
       {category}
     </span>
   );
@@ -22,9 +22,9 @@ function CategoryBadge({ category }: { category: string }) {
 
 function CRMBadge({ status }: { status: string }) {
   if (status === "In CRM") {
-    return <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>;
+    return <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>;
   }
-  return <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>;
+  return <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>;
 }
 
 export default function ConnectionsPage() {
@@ -151,7 +151,7 @@ export default function ConnectionsPage() {
               onClick={() => { setSearch(c.name); setPage(0); }}
               className="px-2.5 py-1 text-xs rounded-lg bg-[#27272a] text-[#a1a1aa] hover:text-white hover:bg-[#3f3f46] transition-colors"
             >
-              {c.name} <span className="text-[#52525b]">({c.count})</span>
+              {c.name} <span className="text-[#71717a]">({c.count})</span>
             </button>
           ))}
         </div>
@@ -208,7 +208,7 @@ export default function ConnectionsPage() {
                 <td>
                   {c.email
                     ? <a href={`mailto:${c.email}`} className="text-cyan-400 hover:text-cyan-300 text-xs truncate max-w-[150px] block">{c.email}</a>
-                    : <span className="text-[#52525b] text-xs">—</span>
+                    : <span className="text-[#71717a] text-xs">—</span>
                   }
                 </td>
                 <td>

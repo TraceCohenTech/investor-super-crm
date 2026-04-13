@@ -36,7 +36,7 @@ function GroupBadge({ name }: { name: string }) {
     "Defense Tech VC": "Defense",
   };
   return (
-    <span className={`inline-flex px-1.5 py-0.5 text-[10px] font-medium rounded border whitespace-nowrap ${colors[name] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
+    <span className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded border whitespace-nowrap ${colors[name] || "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"}`}>
       {short[name] || name}
     </span>
   );
@@ -118,7 +118,7 @@ export default function WhatsAppPage() {
           >
             <div className="text-xs text-[#a1a1aa] truncate">{g.name.replace("(VC MPs only)", "").replace("Peer Community", "")}</div>
             <div className="text-lg font-bold text-white mt-1">{g.members}</div>
-            <div className="text-[10px] text-[#52525b]">{g.messages.toLocaleString()} msgs</div>
+            <div className="text-xs text-[#71717a]">{g.messages.toLocaleString()} msgs</div>
           </button>
         ))}
       </div>
@@ -203,8 +203,8 @@ export default function WhatsAppPage() {
                 </td>
                 <td>
                   {c.inCRM
-                    ? <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>
-                    : <span className="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>
+                    ? <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">In CRM</span>
+                    : <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">New</span>
                   }
                 </td>
                 <td className="text-xs text-[#a1a1aa]">{(c as Record<string, unknown>).focus as string || "—"}</td>
@@ -214,7 +214,7 @@ export default function WhatsAppPage() {
                     : "—"
                   }
                 </td>
-                <td className="text-xs text-[#52525b] whitespace-nowrap">{c.lastSeen || "—"}</td>
+                <td className="text-xs text-[#71717a] whitespace-nowrap">{c.lastSeen || "—"}</td>
               </tr>
             ))}
           </tbody>
