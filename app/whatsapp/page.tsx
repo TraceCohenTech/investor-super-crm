@@ -53,7 +53,7 @@ export default function WhatsAppPage() {
 
   const filtered = useMemo(() => {
     let data = contacts as Contact[];
-    // Remove "You" and "Trace Cohen" from list
+    // Remove "You" from list
     data = data.filter(c => c.name !== "You");
 
     if (search) {

@@ -150,7 +150,7 @@ function FacetRow({ label, facetKey, counts, selected, onToggle, maxItems = 20 }
   );
 }
 
-const SAVED_KEY = "nyvp-saved-searches";
+const SAVED_KEY = "crm-saved-searches";
 function loadSaved(): SavedSearch[] {
   if (typeof window === "undefined") return [];
   try {

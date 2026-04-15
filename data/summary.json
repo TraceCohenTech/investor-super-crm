@@ -1,179 +1,45 @@
 {
-  "totalContacts": 24425,
-  "investorsAndFunds": 10012,
-  "angelsAndIndividuals": 2957,
-  "linkedInOnly": 2919,
-  "active": 1161,
-  "warm": 888,
-  "followUpOverdue": 1132,
-  "nycMetro": 2169,
-  "southFlorida": 113,
-  "bayArea": 433,
-  "boston": 193,
+  "totalContacts": 850,
+  "investorsAndFunds": 320,
+  "angelsAndIndividuals": 180,
+  "linkedInOnly": 95,
+  "active": 142,
+  "warm": 88,
+  "followUpOverdue": 47,
+  "nycMetro": 210,
+  "southFlorida": 65,
+  "bayArea": 175,
+  "boston": 48,
   "topFirms": [
-    {
-      "name": "Meridian Capital",
-      "count": 82
-    },
-    {
-      "name": "Human Ventures",
-      "count": 41
-    },
-    {
-      "name": "4 Points Capital",
-      "count": 36
-    },
-    {
-      "name": "Insight Partners",
-      "count": 31
-    },
-    {
-      "name": "Bessemer Venture Partners",
-      "count": 30
-    },
-    {
-      "name": "Andreessen Horowitz",
-      "count": 30
-    },
-    {
-      "name": "Techstars",
-      "count": 25
-    },
-    {
-      "name": "Greycroft Partners",
-      "count": 23
-    },
-    {
-      "name": "FF Venture Capital",
-      "count": 21
-    },
-    {
-      "name": "RRE Ventures",
-      "count": 21
-    },
-    {
-      "name": "FirstMark Capital",
-      "count": 21
-    },
-    {
-      "name": "SA Angels",
-      "count": 21
-    },
-    {
-      "name": "Lightspeed Venture Partners",
-      "count": 20
-    },
-    {
-      "name": "Tiferes Ventures",
-      "count": 20
-    },
-    {
-      "name": "AngelList",
-      "count": 20
-    }
+    { "name": "Sequoia Capital", "count": 12 },
+    { "name": "Andreessen Horowitz", "count": 10 },
+    { "name": "Accel Partners", "count": 9 },
+    { "name": "Benchmark Capital", "count": 8 },
+    { "name": "Greylock Partners", "count": 7 },
+    { "name": "Lightspeed Ventures", "count": 6 },
+    { "name": "Index Ventures", "count": 6 },
+    { "name": "Founders Fund", "count": 5 },
+    { "name": "First Round Capital", "count": 5 },
+    { "name": "Union Square Ventures", "count": 4 }
   ],
   "regions": [
-    {
-      "name": "Unknown",
-      "count": 20401
-    },
-    {
-      "name": "NYC Metro",
-      "count": 2169
-    },
-    {
-      "name": "Bay Area",
-      "count": 433
-    },
-    {
-      "name": "Other US",
-      "count": 428
-    },
-    {
-      "name": "LA / SoCal",
-      "count": 246
-    },
-    {
-      "name": "Boston",
-      "count": 193
-    },
-    {
-      "name": "DC/DMV",
-      "count": 97
-    },
-    {
-      "name": "International",
-      "count": 93
-    },
-    {
-      "name": "Chicago",
-      "count": 76
-    },
-    {
-      "name": "South Florida",
-      "count": 71
-    },
-    {
-      "name": "Florida",
-      "count": 42
-    },
-    {
-      "name": "Seattle",
-      "count": 33
-    },
-    {
-      "name": "Canada",
-      "count": 33
-    },
-    {
-      "name": "Texas",
-      "count": 31
-    },
-    {
-      "name": "Colorado",
-      "count": 30
-    }
+    { "name": "NYC Metro", "count": 210 },
+    { "name": "Bay Area", "count": 175 },
+    { "name": "South Florida", "count": 65 },
+    { "name": "Boston", "count": 48 },
+    { "name": "LA / SoCal", "count": 42 },
+    { "name": "Chicago", "count": 28 },
+    { "name": "Austin", "count": 22 },
+    { "name": "London", "count": 18 },
+    { "name": "International", "count": 35 },
+    { "name": "Unknown", "count": 207 }
   ],
   "fundStages": [
-    {
-      "name": "Angel",
-      "count": 2564
-    },
-    {
-      "name": "Series A/B",
-      "count": 114
-    },
-    {
-      "name": "Multi-Stage",
-      "count": 76
-    },
-    {
-      "name": "Seed/A",
-      "count": 63
-    },
-    {
-      "name": "Pre-Seed",
-      "count": 60
-    },
-    {
-      "name": "Series B+",
-      "count": 42
-    },
-    {
-      "name": "Growth",
-      "count": 30
-    },
-    {
-      "name": "Seed",
-      "count": 26
-    },
-    {
-      "name": "PE",
-      "count": 25
-    },
-    {
-      "name": "Pre-Seed/Seed",
-      "count": 3
-    }
+    { "name": "Pre-Seed", "count": 85 },
+    { "name": "Seed", "count": 145 },
+    { "name": "Series A", "count": 110 },
+    { "name": "Series B+", "count": 65 },
+    { "name": "Growth", "count": 35 },
+    { "name": "Unknown", "count": 410 }
   ]
 }

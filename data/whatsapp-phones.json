@@ -1,1 +1,8 @@
-[{"name": "12623702275", "phone": "12623702275", "groups": ["Family Office Peer Community"], "messages": 1, "lastSeen": "4/17/25"}]
+[
+  { "name": "Tom Bradley", "phone": "+1-212-555-1001", "groups": ["Pre-Seed Founders", "NYC Angels"], "messages": 45, "lastSeen": "4/10/26" },
+  { "name": "Aisha Bakari", "phone": "+1-212-555-1002", "groups": ["Climate Tech"], "messages": 22, "lastSeen": "4/8/26" },
+  { "name": "Ben Goldberg", "phone": "+1-212-555-1003", "groups": ["Pre-Seed Founders", "Fintech Chat"], "messages": 38, "lastSeen": "4/11/26" },
+  { "name": "Michelle Wong", "phone": "+1-415-555-1004", "groups": ["Pre-Seed Founders"], "messages": 15, "lastSeen": "4/6/26" },
+  { "name": "Carlos Reyes", "phone": "+1-305-555-1005", "groups": ["Climate Tech", "Miami Tech"], "messages": 12, "lastSeen": "4/3/26" },
+  { "name": "Unknown Member", "phone": "+1-917-555-1006", "groups": ["Pre-Seed Founders"], "messages": 3, "lastSeen": "3/20/26" }
+]

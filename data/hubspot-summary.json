@@ -1,101 +1,16 @@
 {
-  "total": 20167,
-  "hasName": 18755,
-  "hasEmail": 17551,
-  "hasPhone": 1873,
-  "inCRM": 6206,
-  "newToCRM": 13961,
-  "owners": {
-    "Brian Cohen": 11117,
-    "Zach Firestone": 6576,
-    "Trace Cohen": 2431,
-    "Rina Zariqi": 18
-  },
-  "leadStatuses": {
-    "Connected": 3,
-    "Attempted to Contact": 1,
-    "Unqualified": 3
-  },
+  "total": 380,
+  "hasName": 375,
+  "hasEmail": 360,
+  "hasPhone": 145,
+  "inCRM": 285,
+  "newToCRM": 95,
+  "owners": { "Alex Rivera": 120, "Jordan Kim": 95, "Sam Chen": 85, "Taylor Morgan": 80 },
+  "leadStatuses": { "Open": 145, "In Progress": 95, "Qualified": 75, "Closed": 65 },
   "topDomains": [
-    {
-      "name": "optonline.net",
-      "count": 147
-    },
-    {
-      "name": "bu.edu",
-      "count": 78
-    },
-    {
-      "name": "meridiancapital.com",
-      "count": 75
-    },
-    {
-      "name": "verizon.net",
-      "count": 53
-    },
-    {
-      "name": "nyu.edu",
-      "count": 53
-    },
-    {
-      "name": "comcast.net",
-      "count": 46
-    },
-    {
-      "name": "mac.com",
-      "count": 44
-    },
-    {
-      "name": "msu.edu",
-      "count": 43
-    },
-    {
-      "name": "stern.nyu.edu",
-      "count": 41
-    },
-    {
-      "name": "licm.org",
-      "count": 38
-    },
-    {
-      "name": "firstrepublic.com",
-      "count": 30
-    },
-    {
-      "name": "gsb.columbia.edu",
-      "count": 29
-    },
-    {
-      "name": "carta.com",
-      "count": 29
-    },
-    {
-      "name": "fkabrands.com",
-      "count": 27
-    },
-    {
-      "name": "cooley.com",
-      "count": 26
-    },
-    {
-      "name": "3imembers.com",
-      "count": 25
-    },
-    {
-      "name": "earthlink.net",
-      "count": 24
-    },
-    {
-      "name": "gs.com",
-      "count": 22
-    },
-    {
-      "name": "newyorkangels.com",
-      "count": 21
-    },
-    {
-      "name": "elliman.com",
-      "count": 20
-    }
+    { "name": "gmail.com", "count": 85 },
+    { "name": "sequoiacap.com", "count": 8 },
+    { "name": "a16z.com", "count": 6 },
+    { "name": "accel.com", "count": 5 }
   ]
 }

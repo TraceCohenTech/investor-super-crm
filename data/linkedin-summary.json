@@ -1,91 +1,16 @@
 {
-  "total": 10579,
-  "inCRM": 3580,
-  "newToCRM": 6999,
-  "investors": 3686,
-  "founders": 2470,
-  "executives": 1985,
-  "hasEmail": 237,
+  "total": 425,
+  "inCRM": 330,
+  "newToCRM": 95,
+  "investors": 180,
+  "founders": 120,
+  "executives": 85,
+  "hasEmail": 310,
   "topCompanies": [
-    {
-      "name": "Stealth Startup",
-      "count": 62
-    },
-    {
-      "name": "American Express",
-      "count": 42
-    },
-    {
-      "name": "Google",
-      "count": 35
-    },
-    {
-      "name": "Stealth",
-      "count": 30
-    },
-    {
-      "name": "Amazon",
-      "count": 23
-    },
-    {
-      "name": "Stealth AI Startup",
-      "count": 23
-    },
-    {
-      "name": "Family Office",
-      "count": 21
-    },
-    {
-      "name": "Citi",
-      "count": 16
-    },
-    {
-      "name": "Andreessen Horowitz",
-      "count": 15
-    },
-    {
-      "name": "Morgan Stanley",
-      "count": 14
-    },
-    {
-      "name": "Meta",
-      "count": 14
-    },
-    {
-      "name": "Amazon Web Services (AWS)",
-      "count": 13
-    },
-    {
-      "name": "Goldman Sachs",
-      "count": 13
-    },
-    {
-      "name": "Syracuse University",
-      "count": 12
-    },
-    {
-      "name": "3i Members",
-      "count": 12
-    },
-    {
-      "name": "Team8",
-      "count": 12
-    },
-    {
-      "name": "Single Family Office",
-      "count": 11
-    },
-    {
-      "name": "J.P. Morgan",
-      "count": 11
-    },
-    {
-      "name": "Silicon Valley Bank",
-      "count": 11
-    },
-    {
-      "name": "PwC",
-      "count": 10
-    }
+    { "name": "Google", "count": 15 },
+    { "name": "Meta", "count": 12 },
+    { "name": "Amazon", "count": 10 },
+    { "name": "Stripe", "count": 8 },
+    { "name": "Goldman Sachs", "count": 7 }
   ]
 }

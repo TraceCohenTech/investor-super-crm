@@ -12,10 +12,10 @@ const geistSans = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "NYVP Investor CRM",
-    template: "%s · NYVP Investor CRM",
+    default: "Investor CRM",
+    template: "%s · Investor CRM",
   },
-  description: "New York Venture Partners — Investor CRM Dashboard",
+  description: "Investor CRM Dashboard Template",
   robots: { index: false, follow: false },
 };
 

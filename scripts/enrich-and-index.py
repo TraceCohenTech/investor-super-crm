@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-NYVP Investor CRM — Enrichment & Unified Search Index Builder (v2)
+Investor CRM — Enrichment & Unified Search Index Builder (v2)
 
-Primary source: NYVP_Investor_CRM.xlsx (master Excel with curated tags)
+Primary source: Investor_CRM.xlsx (master Excel with curated tags)
 Fallback: existing JSON data files for records not in Excel
 Outputs: search-index.json, search-meta.json, dedup-candidates.json
 """
@@ -24,7 +24,7 @@ except ImportError:
     import openpyxl
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
-EXCEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "NYVP_Investor_CRM.xlsx")
+EXCEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "Investor_CRM.xlsx")
 TODAY = datetime.now()
 
 # ─── Sector normalization ───

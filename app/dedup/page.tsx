@@ -20,8 +20,8 @@ const GRADE_COLORS: { [key: string]: string } = {
   F: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
-const MERGE_KEY = "nyvp-merge-decisions";
-const DISMISS_KEY = "nyvp-dedup-dismissed";
+const MERGE_KEY = "crm-merge-decisions";
+const DISMISS_KEY = "crm-dedup-dismissed";
 
 function loadMerges(): MergeDecision[] {
   if (typeof window === "undefined") return [];

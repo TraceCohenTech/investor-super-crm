@@ -1,247 +1,31 @@
 {
-  "total": 24115,
+  "total": 850,
   "facets": {
-    "investorType": {
-      "VC Fund": 9360,
-      "Founder/Executive": 4273,
-      "Individual/Angel": 2588,
-      "LinkedIn": 1916,
-      "Other": 1403,
-      "University": 1127,
-      "Services": 691,
-      "LP": 545,
-      "Family Office": 531,
-      "Legal": 426,
-      "Corporate": 408,
-      "Angel/Syndicate": 359,
-      "Bank": 223,
-      "Startup/Founder": 97,
-      "Service Provider": 56,
-      "Accelerator": 39,
-      "LP/Family Office": 34,
-      "PE Fund": 20,
-      "Hedge Fund": 8,
-      "PE/Growth": 7,
-      "Asset Manager": 4
-    },
-    "region": {
-      "NYC Metro": 2727,
-      "Bay Area": 378,
-      "Other US": 269,
-      "LA / SoCal": 179,
-      "Boston": 165,
-      "South Florida": 72,
-      "International": 65,
-      "DC/DMV": 63,
-      "Chicago": 50,
-      "Israel": 46,
-      "Florida": 43,
-      "Texas": 24,
-      "Colorado": 24,
-      "Seattle": 24,
-      "Canada": 23,
-      "London/UK": 12,
-      "London": 12,
-      "Europe": 8,
-      "Southeast": 7,
-      "Asia/Pacific": 3
-    },
-    "fundStage": {
-      "Angel": 2555,
-      "Series A/B": 124,
-      "Multi-Stage": 76,
-      "Pre-Seed/Seed": 71,
-      "Seed/A": 67,
-      "Series B+": 42,
-      "Seed - Series B+": 36,
-      "Debt/Credit": 31,
-      "Growth": 30,
-      "Seed": 30,
-      "PE": 24,
-      "Pre-Seed - Series A": 11,
-      "Pre-Seed": 1
-    },
-    "status": {
-      "New": 17420,
-      "Contacted": 4658,
-      "Active": 1153,
-      "Warm": 884
-    },
-    "crmStatus": {
-      "In CRM": 22894,
-      "New": 1221
-    },
-    "relationshipStrength": {
-      "Medium": 19348,
-      "Strong": 2040,
-      "Weak": 1684,
-      "None": 1043
-    },
-    "roleType": {
-      "Founder/CEO": 4323,
-      "C-Suite": 2398,
-      "GP/Partner": 1426,
-      "Partner": 1418,
-      "VP": 641,
-      "Principal": 497,
-      "Associate/Analyst": 384,
-      "Managing Director": 2
-    },
-    "checkSize": {
-      "$1M-$5M": 44,
-      "$5M+": 36,
-      "$500K-$1M": 10,
-      "$100K-$500K": 9
-    },
-    "qualityGrade": {
-      "B": 15894,
-      "A": 4813,
-      "C": 3399,
-      "D": 9
-    },
-    "staleness": {
-      "stale": 2140,
-      "healthy": 918,
-      "at-risk": 377
-    },
-    "sector": {
-      "Generalist": 22636,
-      "AI/ML": 424,
-      "Deep Tech": 230,
-      "Consumer": 226,
-      "B2B SaaS": 209,
-      "Applied AI": 141,
-      "Healthcare": 121,
-      "Climate": 119,
-      "Defense/Gov": 102,
-      "Fintech": 86,
-      "Crypto/Web3": 71,
-      "Defense Tech": 59,
-      "PropTech": 19,
-      "Enterprise SaaS": 12,
-      "Tech": 7,
-      "Multi-Stage": 4,
-      "Early-stage technology": 4,
-      "Technology growth equity": 3,
-      "Growth equity, technology": 3,
-      "Credit/PE": 2,
-      "Technology investments": 2,
-      "Media/Content": 1,
-      "Early-stage tech startups": 1
-    },
-    "sources": {
-      "investors": 15774,
-      "linkedin-verified": 10345,
-      "linkedin": 7906,
-      "hubspot": 7454,
-      "angels": 2955,
-      "calendar": 2870,
-      "nyc": 2769,
-      "legal": 2523,
-      "whatsapp": 1021,
-      "follow-up": 990,
-      "needs-review": 495,
-      "re-engage": 492,
-      "south-florida": 115,
-      "lp-pipeline": 101,
-      "gmail": 47,
-      "israel": 43
-    },
-    "tags": {
-      "reachable": 20547,
-      "not-emailed": 17420,
-      "senior": 10955,
-      "verified-linkedin": 10345,
-      "has-linkedin": 10202,
-      "vc": 9360,
-      "multi-source": 9070,
-      "in-hubspot": 7574,
-      "contacted": 4658,
-      "founder": 4273,
-      "email-only": 3568,
-      "nyc": 2769,
-      "angel": 2588,
-      "active": 1153,
-      "university": 1127,
-      "whatsapp": 1021,
-      "warm": 884,
-      "family-office": 738,
-      "lp": 579,
-      "junior": 553,
-      "accelerator": 553,
-      "high-engagement": 497,
-      "ai": 420,
-      "pre-seed": 413,
-      "angel-syndicate": 410,
-      "corporate": 408,
-      "bay-area": 378,
-      "media": 346,
-      "pre-seed-regs": 308,
-      "community-led": 304,
-      "board-member": 275,
-      "growth": 231,
-      "deep-tech": 230,
-      "fo-community": 226,
-      "consumer": 226,
-      "small-check": 222,
-      "early-stage": 202,
-      "endowment": 200,
-      "seed": 190,
-      "la": 179
-    }
+    "investorType": { "VC Fund": 320, "Angel": 180, "Founder/Executive": 120, "Family Office": 45, "Corporate VC": 35, "Accelerator": 25, "LP": 20, "Legal/Services": 15, "Other": 90 },
+    "region": { "NYC Metro": 210, "Bay Area": 175, "South Florida": 65, "Boston": 48, "LA / SoCal": 42, "Chicago": 28, "Austin": 22, "London": 18, "Unknown": 242 },
+    "fundStage": { "Pre-Seed": 85, "Seed": 145, "Series A": 110, "Series B+": 65, "Growth": 35, "Unknown": 410 },
+    "status": { "Active": 142, "Warm": 88, "Contacted": 285, "New": 335 },
+    "crmStatus": { "In CRM": 720, "New": 130 },
+    "relationshipStrength": { "Strong": 95, "Medium": 185, "Weak": 240, "None": 330 },
+    "roleType": { "Partner": 165, "Managing Director": 48, "Principal": 55, "Associate": 72, "Analyst": 35, "Founder": 120, "C-Level": 85, "Angel": 95, "Other": 175 },
+    "checkSize": { "$25K-$100K": 85, "$100K-$500K": 145, "$500K-$2M": 120, "$2M-$10M": 65, "$10M+": 25, "Unknown": 410 },
+    "qualityGrade": { "A": 285, "B": 245, "C": 180, "D": 95, "F": 45 },
+    "staleness": { "healthy": 142, "at-risk": 88, "stale": 185, "unknown": 435 },
+    "sector": { "Generalist": 195, "AI/ML": 85, "Fintech": 72, "B2B SaaS": 95, "Healthcare": 48, "Consumer": 55, "Climate": 35, "Crypto/Web3": 42, "Deep Tech": 28, "Defense/Gov": 18, "Unknown": 177 },
+    "sources": { "email": 520, "linkedin": 425, "hubspot": 380, "whatsapp": 145, "external": 215, "crunchbase": 95 },
+    "tags": { "reachable": 520, "multi-source": 285, "senior": 165, "emerging-manager": 85, "verified-linkedin": 310, "high-engagement": 95, "ai": 85, "fintech": 72, "seed": 145, "pre-seed": 85, "deep-tech": 28, "angel-syndicate": 42, "whatsapp": 145, "in-hubspot": 380, "recently-active": 68 }
   },
   "dataQuality": {
-    "gradeDistribution": {
-      "A": 4813,
-      "B": 15894,
-      "C": 3399,
-      "D": 9,
-      "F": 0
-    },
-    "overallScore": 85.9,
+    "gradeDistribution": { "A": 285, "B": 245, "C": 180, "D": 95, "F": 45 },
+    "overallScore": 62.4,
     "topGaps": [
-      {
-        "field": "Sector",
-        "missing": 22636,
-        "pct": 93.9
-      },
-      {
-        "field": "Fund Stage",
-        "missing": 21017,
-        "pct": 87.2
-      },
-      {
-        "field": "Region",
-        "missing": 19921,
-        "pct": 82.6
-      },
-      {
-        "field": "Title",
-        "missing": 8978,
-        "pct": 37.2
-      },
-      {
-        "field": "LinkedIn",
-        "missing": 3568,
-        "pct": 14.8
-      },
-      {
-        "field": "Company",
-        "missing": 1699,
-        "pct": 7.0
-      },
-      {
-        "field": "Email",
-        "missing": 0,
-        "pct": 0.0
-      }
+      { "field": "Sector", "missing": 177, "pct": 20.8 },
+      { "field": "Region", "missing": 242, "pct": 28.5 },
+      { "field": "Fund Stage", "missing": 410, "pct": 48.2 },
+      { "field": "Check Size", "missing": 410, "pct": 48.2 },
+      { "field": "LinkedIn", "missing": 195, "pct": 22.9 }
     ]
   },
-  "staleness": {
-    "stale": 2140,
-    "atRisk": 377,
-    "healthy": 918,
-    "unknown": 20680
-  },
-  "dedupCandidates": 1605
+  "staleness": { "stale": 185, "atRisk": 88, "healthy": 142, "unknown": 435 },
+  "dedupCandidates": 32
 }

@@ -30,8 +30,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">NYVP Investor CRM</h1>
-        <p className="text-sm text-[#a1a1aa] mt-1">Updated April 12, 2026</p>
+        <h1 className="text-2xl font-bold tracking-tight text-white">Investor CRM</h1>
+        <p className="text-sm text-[#a1a1aa] mt-1">Dashboard Overview</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

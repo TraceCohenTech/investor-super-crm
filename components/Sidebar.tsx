@@ -30,7 +30,7 @@ export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-[#18181b] border-r border-[#27272a] flex flex-col z-50">
       <div className="p-6 border-b border-[#27272a]">
-        <h1 className="text-lg font-bold tracking-tight text-white">NYVP</h1>
+        <h1 className="text-lg font-bold tracking-tight text-white">Your Fund</h1>
         <p className="text-xs text-[#a1a1aa] mt-0.5">Investor CRM</p>
       </div>
 
@@ -56,13 +56,7 @@ export default function Sidebar() {
 
       <div className="p-4 border-t border-[#27272a] text-center space-y-1">
         <div className="flex items-center justify-center gap-3 text-xs text-[#a1a1aa]">
-          <a href="https://x.com/Trace_Cohen" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-            Twitter
-          </a>
-          <span className="text-[#27272a]">|</span>
-          <a href="mailto:t@nyvp.com" className="hover:text-white transition-colors">
-            t@nyvp.com
-          </a>
+          <span className="text-[#71717a]">Investor CRM Template</span>
         </div>
       </div>
     </aside>
