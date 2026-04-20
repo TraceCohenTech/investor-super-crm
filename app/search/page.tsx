@@ -6,8 +6,6 @@ import Link from "next/link";
 import type { ContactRecord, SearchData } from "@/lib/types";
 import {
   SOURCE_LABELS as SRC_LABELS,
-  GRADE_COLORS,
-  STALENESS_CONFIG,
   STRENGTH_COLORS,
 } from "@/lib/types";
 
@@ -53,25 +51,6 @@ const PRESETS: { label: string; icon: string; filters: Partial<Filters>; query?:
   { label: "Founders", icon: "🚀", filters: { investorType: ["Founder/Executive", "Startup/Founder"] } },
 ];
 
-const DOT_COLORS: { [key: string]: string } = {
-  investors: "bg-blue-400", angels: "bg-sky-400", hubspot: "bg-orange-400",
-  linkedin: "bg-cyan-400", "linkedin-verified": "bg-cyan-300", whatsapp: "bg-emerald-400",
-  dealflow: "bg-rose-400", external: "bg-indigo-400", legal: "bg-amber-400",
-  "follow-up": "bg-red-400", nyc: "bg-blue-300", "south-florida": "bg-teal-400",
-  "re-engage": "bg-pink-400", "needs-review": "bg-zinc-400", "lp-pipeline": "bg-violet-400",
-  gmail: "bg-red-400", calendar: "bg-blue-400", israel: "bg-sky-400",
-};
-
-function GradeBadge({ grade }: { grade: string }) {
-  if (!grade) return null;
-  return <span className={`inline-flex px-1.5 py-0.5 text-xs font-bold rounded-full border ${GRADE_COLORS[grade] || ""}`}>{grade}</span>;
-}
-
-function StalenessBadge({ level }: { level: string }) {
-  const cfg = STALENESS_CONFIG[level];
-  if (!cfg) return null;
-  return <span className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full border ${cfg.color}`}>{cfg.label}</span>;
-}
 
 function TypeBadge({ type }: { type: string }) {
   const colors: { [key: string]: string } = {
@@ -95,15 +74,6 @@ function StrengthBadge({ strength }: { strength: string }) {
   return <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${STRENGTH_COLORS[strength] || ""}`}>{strength}</span>;
 }
 
-function SourceDots({ sources }: { sources: string[] }) {
-  return (
-    <div className="flex gap-1 items-center" title={sources.map(s => SRC_LABELS[s] || s).join(", ")}>
-      {sources.map(s => (
-        <span key={s} className={`w-2 h-2 rounded-full ${DOT_COLORS[s] || "bg-zinc-400"}`} />
-      ))}
-    </div>
-  );
-}
 
 function FacetRow({ label, facetKey, counts, selected, onToggle, maxItems = 20 }: {
   label: string;
