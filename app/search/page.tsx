@@ -547,12 +547,7 @@ function SearchPage() {
                 Title {sortKey === "t" && (sortDir === "asc" ? "↑" : "↓")}
               </th>
               <th>Type</th>
-              <th className="cursor-pointer select-none" onClick={() => toggleSort("q")}>
-                Grade {sortKey === "q" && (sortDir === "asc" ? "↑" : "↓")}
-              </th>
-              <th>Health</th>
               <th>Strength</th>
-              <th>Sources</th>
               <th>Links</th>
             </tr>
           </thead>
@@ -567,10 +562,7 @@ function SearchPage() {
                 <td className="text-[#a1a1aa] text-xs max-w-[160px] truncate">{r.c || "—"}</td>
                 <td className="text-[#a1a1aa] text-xs max-w-[200px] truncate">{r.t || "—"}</td>
                 <td><TypeBadge type={r.it} /></td>
-                <td><GradeBadge grade={r.q} /></td>
-                <td><StalenessBadge level={r.sl} /></td>
                 <td><StrengthBadge strength={r.rs} /></td>
-                <td><SourceDots sources={r.src} /></td>
                 <td className="flex items-center gap-2">
                   {r.e && <a href={`mailto:${r.e}`} className="text-cyan-400 hover:text-cyan-300 text-xs">Email</a>}
                   {r.li && <a href={r.li} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">LI</a>}
@@ -580,7 +572,7 @@ function SearchPage() {
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-[#71717a]">
+                <td colSpan={6} className="text-center py-12 text-[#71717a]">
                   No results match your filters. Try broadening your search.
                 </td>
               </tr>
