@@ -504,7 +504,15 @@ function SearchPage() {
 
       {/* Results Table */}
       <div className="table-container bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden max-h-[55vh] overflow-y-auto">
-        <table>
+        <table className="table-fixed w-full">
+          <colgroup>
+            <col className="w-[18%]" />
+            <col className="w-[20%]" />
+            <col className="w-[20%]" />
+            <col className="w-[12%]" />
+            <col className="w-[10%]" />
+            <col className="w-[20%]" />
+          </colgroup>
           <thead>
             <tr>
               <th className="cursor-pointer select-none" onClick={() => toggleSort("n")}>
@@ -524,16 +532,16 @@ function SearchPage() {
           <tbody>
             {paged.map((r) => (
               <tr key={r.id}>
-                <td className="font-medium whitespace-nowrap">
+                <td className="font-medium truncate">
                   <Link href={`/contact/${r.id}`} className="text-white hover:text-[#3b82f6] transition-colors">
                     {r.n}
                   </Link>
                 </td>
-                <td className="text-[#a1a1aa] text-xs max-w-[160px] truncate">{r.c || "—"}</td>
-                <td className="text-[#a1a1aa] text-xs max-w-[200px] truncate">{r.t || "—"}</td>
-                <td><TypeBadge type={r.it} /></td>
-                <td><StrengthBadge strength={r.rs} /></td>
-                <td className="flex items-center gap-2">
+                <td className="text-[#a1a1aa] text-xs truncate">{r.c || "—"}</td>
+                <td className="text-[#a1a1aa] text-xs truncate">{r.t || "—"}</td>
+                <td className="truncate"><TypeBadge type={r.it} /></td>
+                <td className="truncate"><StrengthBadge strength={r.rs} /></td>
+                <td className="whitespace-nowrap">
                   {r.e && <a href={`mailto:${r.e}`} className="text-cyan-400 hover:text-cyan-300 text-xs">Email</a>}
                   {r.li && <a href={r.li} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">LI</a>}
                   <Link href={`/contact/${r.id}#intros`} className="text-emerald-400 hover:text-emerald-300 text-xs">Intro</Link>

@@ -28,7 +28,6 @@ body {
 .table-container table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;
 }
 .table-container th {
   text-align: left;
@@ -51,6 +50,5 @@ body {
   color: #e4e4e7;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 0;
 }
 .table-container tr:hover td { background: rgba(59, 130, 246, 0.04); }
