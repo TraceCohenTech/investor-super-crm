@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ContactRecord, SearchData } from "@/lib/types";
 import {
+  getNotes, addNote, deleteNote,
+  getFollowUp, setFollowUp as saveFollowUp,
+} from "@/lib/local-store";
+import {
   SOURCE_COLORS,
   SOURCE_LABELS,
   GRADE_COLORS,
@@ -110,6 +114,12 @@ export default function ContactDetailPage() {
       .slice(0, 15);
   }, [data, contact]);
 
+  const [notes, setNotes] = useState(getNotes(id));
+  const [newNote, setNewNote] = useState("");
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [followUpDate, setFollowUpDate] = useState(getFollowUp(id) || "");
+  const [showFollowUp, setShowFollowUp] = useState(false);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -128,6 +138,25 @@ export default function ContactDetailPage() {
       </div>
     );
   }
+
+  const handleAddNote = () => {
+    if (!newNote.trim()) return;
+    addNote(id, newNote.trim());
+    setNotes(getNotes(id));
+    setNewNote("");
+    setShowNoteInput(false);
+  };
+
+  const handleDeleteNote = (index: number) => {
+    deleteNote(id, index);
+    setNotes(getNotes(id));
+  };
+
+  const handleSetFollowUp = (date: string) => {
+    saveFollowUp(id, date || null);
+    setFollowUpDate(date);
+    setShowFollowUp(false);
+  };
 
   const tags = contact.tg || [];
   const sectors = contact.sc || [];
@@ -184,6 +213,78 @@ export default function ContactDetailPage() {
           )}
           {contact.il && <span className="text-[#a1a1aa]">🇮🇱 Israel</span>}
         </div>
+
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-[#27272a]">
+          {contact.e && (
+            <a
+              href={`mailto:${contact.e}?subject=${encodeURIComponent(`Following up — ${contact.n}`)}`}
+              className="px-3 py-2 text-xs font-medium rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+            >
+              Send Email
+            </a>
+          )}
+          {contact.li && (
+            <a
+              href={contact.li}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 text-xs font-medium rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-colors"
+            >
+              Open LinkedIn
+            </a>
+          )}
+          <button
+            onClick={() => setShowNoteInput(!showNoteInput)}
+            className="px-3 py-2 text-xs font-medium rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-colors"
+          >
+            {showNoteInput ? "Cancel Note" : "Add Note"}
+          </button>
+          <button
+            onClick={() => setShowFollowUp(!showFollowUp)}
+            className="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+          >
+            {followUpDate ? `Follow-up: ${followUpDate}` : "Set Follow-Up"}
+          </button>
+        </div>
+
+        {/* Note Input */}
+        {showNoteInput && (
+          <div className="mt-3 flex gap-2">
+            <input
+              type="text"
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleAddNote(); }}
+              placeholder="Type a note and press Enter..."
+              autoFocus
+              className="flex-1 bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white placeholder:text-[#71717a] focus:outline-none focus:border-[#3b82f6] transition-colors"
+            />
+            <button onClick={handleAddNote} className="px-3 py-2 text-xs font-medium rounded-lg bg-[#3b82f6] text-white hover:bg-[#2563eb] transition-colors">
+              Save
+            </button>
+          </div>
+        )}
+
+        {/* Follow-Up Picker */}
+        {showFollowUp && (
+          <div className="mt-3 flex items-center gap-2">
+            <input
+              type="date"
+              value={followUpDate}
+              onChange={(e) => handleSetFollowUp(e.target.value)}
+              className="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6] transition-colors"
+            />
+            {followUpDate && (
+              <button
+                onClick={() => handleSetFollowUp("")}
+                className="px-3 py-2 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Engagement Stats */}
@@ -312,9 +413,27 @@ export default function ContactDetailPage() {
       )}
 
       {/* Notes */}
-      {contact.nt && (
-        <Section title="Notes">
-          <p className="text-sm text-[#a1a1aa]">{contact.nt}</p>
+      {(contact.nt || notes.length > 0) && (
+        <Section title={`Notes${notes.length > 0 ? ` (${notes.length})` : ""}`}>
+          {contact.nt && <p className="text-sm text-[#a1a1aa] mb-3">{contact.nt}</p>}
+          {notes.length > 0 && (
+            <div className="space-y-2">
+              {notes.map((note, i) => (
+                <div key={i} className="flex items-start justify-between gap-2 py-1.5 border-t border-[#27272a] first:border-0">
+                  <div>
+                    <p className="text-sm text-white">{note.text}</p>
+                    <span className="text-xs text-[#71717a]">{note.date}</span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteNote(i)}
+                    className="text-xs text-[#71717a] hover:text-red-400 transition-colors shrink-0"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
       )}
 
