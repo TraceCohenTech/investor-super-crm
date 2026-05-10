@@ -22,6 +22,7 @@ const nav = [
   { href: "/re-engage", label: "Re-Engage", icon: "🎯" },
   { href: "/needs-review", label: "Needs Review", icon: "📋" },
   { href: "/network", label: "Network Graph", icon: "🕸️" },
+  { href: "/network-3d", label: "3D Network", icon: "🌌" },
   { href: "/dedup", label: "Dedup Review", icon: "🔄" },
 ];
 
